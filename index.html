@@ -246,7 +246,9 @@ CNCF 发布了 containerd 的旅程报告链接：https://www.cncf.io/blog/2020/
           <!-- 在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。
 
 
-启动入口kubelet 的主函数入口在 cmd/kub... -->
+此源码分析基于 K8s 1.14.6
+
+Kubelet... -->
           在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。
 
         

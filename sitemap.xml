@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://packyzbq.github.io/kubelet%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.html</loc>
+    
+    <lastmod>2020-02-12T09:30:52.412Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://packyzbq.github.io/Kubeweekly.html</loc>
     
     <lastmod>2020-02-11T08:53:53.407Z</lastmod>
@@ -19,13 +26,6 @@
     <loc>http://packyzbq.github.io/CNCF%E5%91%A8%E6%8A%A5-2.09.html</loc>
     
     <lastmod>2020-02-11T08:53:35.755Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://packyzbq.github.io/kubelet%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.html</loc>
-    
-    <lastmod>2020-02-07T07:54:02.856Z</lastmod>
     
   </url>
   
