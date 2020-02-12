@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>kubectl的用户认证授权 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="k8s,rbac,认证授权">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="K8s 中 rbac的认证应用">
+<meta name="keywords" content="k8s,rbac,认证授权">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubectl的用户认证授权">
+<meta property="og:url" content="http://packyzbq.github.io/k8s-rbac-认证.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="K8s 中 rbac的认证应用">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+<meta property="og:updated_time" content="2019-11-01T06:53:32.862Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kubectl的用户认证授权">
+<meta name="twitter:description" content="K8s 中 rbac的认证应用">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-k8s-rbac-认证" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6hnf6ym001hs8ul8ia2gc3a">
+        <img src="/gallery/k8s-header.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      kubectl的用户认证授权
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/k8s-rbac-认证.html" class="article-date">
+	  <time datetime="2019-10-30T05:57:56.000Z" itemprop="datePublished">October 30, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在 linux 系统中可能会包含很多用户，且不同用户有不同的权限，若需要为不同的用户设置不同的操作K8s的权限，就需要用到 K8s 的 rbac 机制。下面以创建一个 user 用户，为其设置在 default namespace 下的只读权限。</p>
+<a id="more"></a>
+
+<p>在上一篇 <a href="/kubectl-startup.html" title="kubectl执行步骤拆解">kubectl执行步骤拆解</a> 中，我们执行 kubectl 命令时会需要 kube-apiserver 的认证和授权，即利用用户的证书和 rbac 机制，因此若对系统用户进行权限控制，首先需要为用户创建证书。</p>
+<h2 id="证书创建"><a href="#证书创建" class="headerlink" title="证书创建"></a>证书创建</h2><p>首先创建一个用户组和普通用户</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">groupadd usergroup</span><br><span class="line">useradd user -g usergroup -m</span><br></pre></td></tr></table></figure>
+
+<p>为用户创建证书有两种方式，可以使用 K8s 推荐的 cfssl，也可以用 openssl。</p>
+<h3 id="openssl-创建证书"><a href="#openssl-创建证书" class="headerlink" title="openssl 创建证书"></a>openssl 创建证书</h3><p>我们默认 K8s 部署时所创建的认证相关的密钥和证书都保存在<code>/etc/kubernetes/ssl/</code>中。</p>
+<ol>
+<li><p>生成私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out user.key 2048</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成签名</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CA_DNAME=<span class="string">"/CN=user/OU=Sysem/O=group:view/L=Beijing/ST=Beijing/C=CN"</span></span><br><span class="line">openssl req -new -key user.key -subj <span class="variable">$CA_DNAME</span> -out user.csr</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>其中 CA_DNAME 显示签名的所有者，CN 为名字，</p>
+<ol start="3">
+<li>生成证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -CA /etc/kubernetes/ssl/ca.crt -CA /etc/kubernetes/ssl/ca.key -CAcreateserial -<span class="keyword">in</span> user.csr -out user.crt -day 365</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="cfssl-创建证书"><a href="#cfssl-创建证书" class="headerlink" title="cfssl 创建证书"></a>cfssl 创建证书</h3><h2 id="配置-K8s-上下文"><a href="#配置-K8s-上下文" class="headerlink" title="配置 K8s 上下文"></a>配置 K8s 上下文</h2><p>切换到 user 用户后，配置访问的集群</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl config <span class="built_in">set</span>-cluster &lt;yourCluster&gt; \</span><br><span class="line">--certificate-authority=/etc/kubernetes/ssl/ca.crt \</span><br><span class="line">--embed-certs=<span class="literal">true</span> \</span><br><span class="line">--server=&lt;your apiserver&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其中 certificate-authority 使用的是 K8s 生成的证书</p>
+<blockquote>
+<p>cluster name 可以通过 <code>kubectl config get-clusters</code> 获取<br>apiserver 通过 <code>kubectl cluster-info</code> 获取</p>
+</blockquote>
+<p>配置认证证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl config <span class="built_in">set</span>-credentials user\</span><br><span class="line">--client-certificate=user.crt \</span><br><span class="line">--client-key=user.key \</span><br><span class="line">--embed-cert=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，此处的 user 并非系统用户名，而是 CA_DNAME 中的用户名，即在K8s的 rbac 中认证的名字。OU为组，同样关联 K8s rbac 认证的组</p>
+<p>配置上下文</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl config <span class="built_in">set</span>-context contextName \</span><br><span class="line">--cluster=&lt;your clustername&gt; \</span><br><span class="line">--user=user <span class="comment"># 此处user 仍是 CA_DNAME 中的用户名</span></span><br></pre></td></tr></table></figure>
+
+<p>这样就配置好 user 用户的 kubectl 访问的上下文了。上下文信息默认保存在了 <code>$HOME/.kube/config</code> 中。<br>这几步中其实可以看出 K8s 的认证与系统用户名及其所在组毫无关系，K8s 只关心用户通过 kubectl 访问时所携带的证书，即 config 文件中所包含的认证信息。因此如果用户有权指定 root 用户下的 <code>.kube/config</code> 作为上下文配置，则可以拥有所有权限。</p>
+<h2 id="K8s-rbac-配置"><a href="#K8s-rbac-配置" class="headerlink" title="K8s rbac 配置"></a>K8s rbac 配置</h2><p>K8s 中使用 RBAC 授权器为用户授权，相关资源有 <code>Role</code> <code>ClusterRole</code> <code>RoleBinding</code> <code>ClusterRoleBinding</code></p>
+<h3 id="Role-amp-ClusterRole"><a href="#Role-amp-ClusterRole" class="headerlink" title="Role &amp; ClusterRole"></a>Role &amp; ClusterRole</h3><p><code>Role</code>和<code>ClusterRole</code>用于描述角色权限的，即配置角色对于资源的可操作权限，<code>Role</code>可只属于某个namespace, <code>ClusterRole</code>隶属于全局。</p>
+<p>一个 <code>Role</code> 对象只能用于授予对某一单一命名空间中资源的访问权限。 以下示例描述了”default”命名空间中的一个Role对象的定义，用于授予对pod的读访问权限：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">pod-reader</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span> <span class="comment"># 空字符串""表明使用core API group</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["pods"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"list"</span><span class="string">]</span></span><br></pre></td></tr></table></figure>
+
+<p><code>ClusterRole</code>对象可以授予与Role对象相同的权限，但由于它们属于集群范围对象， 也可以使用它们授予对以下几种资源的访问权限：</p>
+<ul>
+<li>集群范围资源（例如节点，即node）</li>
+<li>非资源类型endpoint（例如”/healthz”）</li>
+<li>跨所有命名空间的命名空间范围资源（例如pod，需要运行命令kubectl get pods –all-namespaces来查询集群中所有的pod）<br>在本例中，若使用<code>ClusterRole</code>，则如下所示：<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">global-pod-reader</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span> <span class="comment"># 空字符串""表明使用core API group</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["pods"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"list"</span><span class="string">]</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="RoleBinding-amp-ClusterRoleBinding"><a href="#RoleBinding-amp-ClusterRoleBinding" class="headerlink" title="RoleBinding &amp; ClusterRoleBinding"></a>RoleBinding &amp; ClusterRoleBinding</h3><p>角色绑定将一个角色中定义的各种权限授予一个或者一组用户。 角色绑定包含了一组相关主体（即subject, 包括用户——User、用户组——Group、或者服务账户——Service Account）以及对被授予角色的引用。 在命名空间中可以通过<code>RoleBinding</code>对象授予权限，而集群范围的权限授予则通过<code>ClusterRoleBinding</code>对象完成。</p>
+<p><code>RoleBinding</code>可以引用在同一命名空间内定义的<code>Role</code>对象。 下面我们定义<code>RoleBinding</code>对象在”default”命名空间中将”pod-reader”角色授予用户”user”。 这一授权将允许用户”user”从”default”命名空间中读取pod。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">read-pods</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">User</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">user</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">pod-reader</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br></pre></td></tr></table></figure>
+
+<p>若使用 <code>ClusterRoleBinding</code>，则如下所示：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">read-pod-global</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span> <span class="comment"># 这里表明的是权限的作用域，而非所属哪个namespace，若没有这个字段，则表明作用域为全局。</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">User</span>   <span class="comment"># 此处也可以更换为 Group ，对应之前 CA_DNAME 中的 OU</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">user</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">global-pod-reader</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br></pre></td></tr></table></figure>
+
+<p>在K8s中，系统包含默认的用户，如下<br>| ClusterRole | ClusterRoleBinding | info|<br>|—|—|—|<br>|cluster-admin|system:masters group|超级用户权限，允许对任何资源执行任何操作。 在ClusterRoleBinding中使用时，可以完全控制集群和所有命名空间中的所有资源。 在RoleBinding中使用时，可以完全控制RoleBinding所在命名空间中的所有资源，包括命名空间自己。|<br>|admin|None|管理员权限，利用RoleBinding在某一命名空间内部授予。 在RoleBinding中使用时，允许针对命名空间内大部分资源的读写访问， 包括在命名空间内创建角色与角色绑定的能力。 但不允许对资源配额（resource quota）或者命名空间本身的写访问。|<br>|edit|None|允许对某一个命名空间内大部分对象的读写访问，但不允许查看或者修改角色或者角色绑定。|<br>|view|None|允许对某一个命名空间内大部分对象的只读访问。 不允许查看角色或者角色绑定。 由于可扩散性等原因，不允许查看secret资源。|</p>
+<p>参考自<a href="https://jimmysong.io/kubernetes-handbook/concepts/rbac.html" target="_blank" rel="noopener">https://jimmysong.io/kubernetes-handbook/concepts/rbac.html</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此我们已经实现了通过 rbac 对系统用户的权限控制，对于用户的权限，可以使用 <code>kubectl auth can-i &lt;verbs&gt; &lt;resource&gt;</code> 的命令进行验证。</p>
+<p>此处个人推荐一本 ebook，<a href="https://jimmysong.io/kubernetes-handbook/" target="_blank" rel="noopener">kubernetes handbook</a>。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/istio-生产环境搭建.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          istio-生产环境搭建
+        
+      </div>
+    </a>
+  
+  
+    <a href="/springboot-es.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Gradle &amp; Springboot 引入ES低版本的问题</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#证书创建"><span class="nav-number">1.</span> <span class="nav-text">证书创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#openssl-创建证书"><span class="nav-number">1.1.</span> <span class="nav-text">openssl 创建证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cfssl-创建证书"><span class="nav-number">1.2.</span> <span class="nav-text">cfssl 创建证书</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置-K8s-上下文"><span class="nav-number">2.</span> <span class="nav-text">配置 K8s 上下文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#K8s-rbac-配置"><span class="nav-number">3.</span> <span class="nav-text">K8s rbac 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Role-amp-ClusterRole"><span class="nav-number">3.1.</span> <span class="nav-text">Role &amp; ClusterRole</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RoleBinding-amp-ClusterRoleBinding"><span class="nav-number">3.2.</span> <span class="nav-text">RoleBinding &amp; ClusterRoleBinding</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

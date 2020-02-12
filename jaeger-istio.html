@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>jaeger 在 istio 上的实践 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="istioserviceMesh链路追踪">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="最近在搭建 istio 环境，正好调研到服务治理的链路追踪这一层，istio 所支持的有 jaeger、zipkin 以及 lightstep，本篇探索一下生产环境下 jaeger 的部署。">
+<meta name="keywords" content="istio,serviceMesh,链路追踪">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jaeger 在 istio 上的实践">
+<meta property="og:url" content="http://packyzbq.github.io/jaeger-istio.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="最近在搭建 istio 环境，正好调研到服务治理的链路追踪这一层，istio 所支持的有 jaeger、zipkin 以及 lightstep，本篇探索一下生产环境下 jaeger 的部署。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/jaeger-logo.png">
+<meta property="og:updated_time" content="2020-01-08T03:11:57.834Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="jaeger 在 istio 上的实践">
+<meta name="twitter:description" content="最近在搭建 istio 环境，正好调研到服务治理的链路追踪这一层，istio 所支持的有 jaeger、zipkin 以及 lightstep，本篇探索一下生产环境下 jaeger 的部署。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/jaeger-logo.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-jaeger-istio" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/jaeger-logo.png" rel="gallery_ck6hnf6yn001js8ull38f9nwm">
+        <img src="/gallery/jaeger-logo.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      jaeger 在 istio 上的实践
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/jaeger-istio.html" class="article-date">
+	  <time datetime="2019-10-16T09:13:54.000Z" itemprop="datePublished">October 16, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近在搭建 istio 环境，正好调研到服务治理的链路追踪这一层，istio 所支持的有 jaeger、zipkin 以及 lightstep，本篇探索一下生产环境下 jaeger 的部署。</p>
+<a id="more"></a>
+
+<h2 id="Jaeger-简介"><a href="#Jaeger-简介" class="headerlink" title="Jaeger 简介"></a>Jaeger 简介</h2><p>Jaeger 是Uber推出的一款开源分布式追踪系统，兼容OpenTracing API。分布式追踪系统用于记录请求范围内的信息，包括一次调用的服务链路以及每个服务的延时，能够帮助我们很好的分析微服务间链路调用的错误及瓶颈。</p>
+<p>OpenTracing api 及其原理将在下一篇 blog 中介绍。由于 istio 默认支持 Jaeger，因此准备测试下 Jaeger与Istio的集成。</p>
+<p>Jaeger 整体架构如下图，主要包括3个组件： agent，collector以及query(UI)</p>
+<ul>
+<li>agent: 用于监听应用传来的链路信息，并传递给collector，</li>
+<li>collector：收集链路信息，并持久化。 其支持的后端存储为 Cassandra、ElasticSearch。此外也支持对接 Kafka，以进行后续的流式处理（可连入 spark、flink 以进一步分析）</li>
+<li>query：提供查询的 api 接口及 UI 界面</li>
+</ul>
+<h3 id="Jaeger-vs-Zipkin-vs-Skywalk"><a href="#Jaeger-vs-Zipkin-vs-Skywalk" class="headerlink" title="Jaeger vs Zipkin vs Skywalk"></a>Jaeger vs Zipkin vs Skywalk</h3><p>//TODO</p>
+<h2 id="Jaeger-部署"><a href="#Jaeger-部署" class="headerlink" title="Jaeger 部署"></a>Jaeger 部署</h2><p>在 K8s 环境中，Jaeger 支持两种模式部署：</p>
+<ol>
+<li>all-in-one</li>
+<li>生产模式</li>
+</ol>
+<h3 id="all-in-one"><a href="#all-in-one" class="headerlink" title="all-in-one"></a>all-in-one</h3><p>all-in-one 模式是 istio 默认支持的模式，只需要在使用 helm 部署 istio 时，修改 values.yml 中 <code>tracing: enabled: true</code> 即可。这样无需其他操作。</p>
+<p>由于 all-in-one 模式是用于测试的demo，因此所有的链路信息默认存储在内存中，无法用于生产环境。</p>
+<p>若单独在 K8s 平台中， Jaeger 官方推荐使用 <strong>Jaeger Operator</strong> 部署。Operator 部署相对来说比较简单，参考连接<a href="https://www.jaegertracing.io/docs/1.14/operator/，此处不再赘述。" target="_blank" rel="noopener">https://www.jaegertracing.io/docs/1.14/operator/，此处不再赘述。</a></p>
+<blockquote>
+<p>Operator 是 K8s 平台提供的一种可自定义 Controller 的方式，此外仍需定义一系列的 CRD，自定义 Operator 通过监听 CRD 的状态更新，实现一系列的逻辑，比如创建 deployment 等。</p>
+</blockquote>
+<h3 id="生产环境部署"><a href="#生产环境部署" class="headerlink" title="生产环境部署"></a>生产环境部署</h3><p>Jaeger 在生产环境，需要独立部署三个组件，这样可以提高软件的扩展性和稳定性。</p>
+<p>在 K8s 平台部署，可以参考 <a href="https://github.com/jaegertracing/jaeger-kubernetes" target="_blank" rel="noopener">jaeger-on-k8s</a>。其中collector 以及 query 均以 deployment 的形式部署；agent 可以选择 daemonSet 或以 sidecar 注入的方式部署。若 agent 选择 daemonSet 的方式，意味着每个节点中的所有pod 都可以向 Jaeger 发送链路信息。但在特定场景中，我们并不想收集所有服务的链路信息，因此可以选用 sidecar 的形式。</p>
+<p>sidecar 具体形式如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">  metadata:</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">  spec:</span></span><br><span class="line"><span class="attr">    selector:</span></span><br><span class="line"><span class="attr">      matchLabels:</span></span><br><span class="line">        <span class="string">app.kubernetes.io/name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">    template:</span></span><br><span class="line"><span class="attr">      metadata:</span></span><br><span class="line"><span class="attr">        labels:</span></span><br><span class="line">          <span class="string">app.kubernetes.io/name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">      spec:</span></span><br><span class="line"><span class="attr">        containers:</span></span><br><span class="line"><span class="attr">        - image:</span> <span class="string">mynamespace/hello-myimage</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">          ports:</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">        - image:</span> <span class="string">jaegertracing/jaeger-agent</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">jaeger-agent</span></span><br><span class="line"><span class="attr">          ports:</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">5775</span></span><br><span class="line"><span class="attr">            protocol:</span> <span class="string">UDP</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">6831</span></span><br><span class="line"><span class="attr">            protocol:</span> <span class="string">UDP</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">6832</span></span><br><span class="line"><span class="attr">            protocol:</span> <span class="string">UDP</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">5778</span></span><br><span class="line"><span class="attr">            protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">          args:</span> <span class="string">["--collector.host-port=jaeger-collector.jaeger-infra.svc:14267"]</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>若使用 Jaeger Operator 部署的Jaeger， 仅需要在 Deployment 中加入注解 <code>sidecar.jaegertracing.io/inject： true</code>，以sidecar 的形式注入，则需要给应用客户端配置 <code>JAEGER_AGENT_HOST</code>来告诉服务 agent 在哪。</p>
+</blockquote>
+<h3 id="Isito-amp-Jaeger"><a href="#Isito-amp-Jaeger" class="headerlink" title="Isito &amp; Jaeger"></a>Isito &amp; Jaeger</h3><p>在 istio 中，我们可以不部署 agent 组件。因为在 istio 中，若在 mixer 组件配置 <code>zipkin-address-url</code> 参数，则会默认为服务网格中的服务创建调用链路信息，并发送到配置的地址中。</p>
+<blockquote>
+<p>这里的<code>zipkin-address-url</code> 并非真正部署的 zipkin， 而是这个地址可以兼容 zipkin 所使用的数据格式。</p>
+</blockquote>
+<p>因此，我们利用上述方法部署 jaeger collecor 和 query ui。首先创建 config.yml 用于配置 Jaeger，</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jaeger-configuration</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">jaeger</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">jaeger</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line"><span class="attr">  span-storage-type:</span> <span class="string">elasticsearch</span></span><br><span class="line"><span class="attr">  collector:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">    es:</span></span><br><span class="line"><span class="attr">      server-urls:</span> <span class="attr">http://elasticsearch-logging.kube-system:9200</span></span><br><span class="line"><span class="attr">    collector:</span></span><br><span class="line"><span class="attr">      zipkin:</span></span><br><span class="line"><span class="attr">        http-port:</span> <span class="number">9411</span></span><br><span class="line"><span class="attr">  query:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">    es:</span></span><br><span class="line"><span class="attr">      server-urls:</span> <span class="attr">http://elasticsearch-logging.kube-system:9200</span></span><br><span class="line"><span class="attr">  agent:</span> <span class="string">|</span></span><br><span class="line"><span class="string"></span><span class="attr">    collector:</span></span><br><span class="line"><span class="attr">      host-port:</span> <span class="string">"jaeger-collector:14267"</span></span><br></pre></td></tr></table></figure>
+
+<p>然后获取生产模式的 Jaeger 部署文件并进行部署。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/jaeger-production-template.yml</span><br></pre></td></tr></table></figure>
+
+<p>部署好之后，环境如下所示。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pod</span></span><br><span class="line">NAME                               READY   STATUS    RESTARTS   AGE</span><br><span class="line">jaeger-collector-b9bf6d75b-gvg7r   1/1     Running   0          25h</span><br><span class="line">jaeger-query-5fd6c9dcff-wvm82      1/1     Running   0          25h</span><br><span class="line"></span><br><span class="line"><span class="comment"># service</span></span><br><span class="line">NAME               TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S) </span><br><span class="line">jaeger-collector   ClusterIP      10.233.20.50   &lt;none&gt;        14267/TCP,14268/TCP,9411/TCP </span><br><span class="line">jaeger-query       LoadBalancer   10.233.4.232   10.7.13.201   80:40000/TCP             </span><br><span class="line">zipkin             ClusterIP      10.233.4.179   &lt;none&gt;        9411/TCP</span><br></pre></td></tr></table></figure>
+
+<p>对于已经部署好的 istio，需要修改 istio-system namespace 下的 名为 istio 的 configmap，更替其中的 <code>zipkin: address: xxx</code>为 Jaeger collector的 9411端口的服务。并重启应用所在的pod，以使该配置生效。</p>
+<blockquote>
+<p>可以检查 应用pod中的 envoy 配置是否已修改。在 istio-proxy container中的 /etc/istio/proxy/recvx.json中可以找到。</p>
+</blockquote>
+<p>若还未部署istio，则只需在helm 安装时，增加 <code>--set gloable.zipkin.address=xxxx</code> 参数。</p>
+<blockquote>
+<p>注意 这里有一个坑！ istio 的 policy 组件默认设置的链路追踪采样率为 1%，因此在配置好 Jaeger 以后可能访问好几次服务都无法获取链路信息（这个地方困了我一天，一直以为是哪个地方配错了。。。哎），可以在部署 istio的时候，添加参数 <code>--set policy.sampling=10</code> 修改为 10% 或其他数字。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实 Jaeger 官方特别推荐使用 Operator 来部署 Jaeger，毕竟 Operator 是未来 K8s 使用的主流趋势，并且确实方便快捷。此外还有一种流式模式，即部署 Jaeger 对接 Kafka 的方式本文中并未列出，详情可参考 Jaeger 官方文档。本文只简单记录下平台层面上 Jaeger 的部署，并未涉及业务逻辑和业务场景，毕竟大规模的业务场景下，也需要更复杂的配置，包括 jaeger 采样策略，对接ES 或 Kafka 进行流式处理及分析等。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/istio/">istio</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/serviceMesh/">serviceMesh</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/链路追踪/">链路追踪</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/kubectl-startup.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          kubectl 执行步骤拆解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/gateway-case.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">istio-出入站流量管理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Jaeger-简介"><span class="nav-number">1.</span> <span class="nav-text">Jaeger 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Jaeger-vs-Zipkin-vs-Skywalk"><span class="nav-number">1.1.</span> <span class="nav-text">Jaeger vs Zipkin vs Skywalk</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jaeger-部署"><span class="nav-number">2.</span> <span class="nav-text">Jaeger 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#all-in-one"><span class="nav-number">2.1.</span> <span class="nav-text">all-in-one</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生产环境部署"><span class="nav-number">2.2.</span> <span class="nav-text">生产环境部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Isito-amp-Jaeger"><span class="nav-number">2.3.</span> <span class="nav-text">Isito &amp; Jaeger</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

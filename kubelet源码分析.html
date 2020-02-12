@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>kubelet源码分析--启动篇 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="K8skubelet">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。">
+<meta name="keywords" content="K8s,kubelet">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubelet源码分析--启动篇">
+<meta property="og:url" content="http://packyzbq.github.io/kubelet源码分析.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+<meta property="og:updated_time" content="2020-02-07T07:54:02.856Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kubelet源码分析--启动篇">
+<meta name="twitter:description" content="在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-kubelet源码分析" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6hnf71z004bs8ulnw9xc5cv">
+        <img src="/gallery/k8s-header.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      kubelet源码分析--启动篇
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/kubelet源码分析.html" class="article-date">
+	  <time datetime="2020-02-05T02:34:28.000Z" itemprop="datePublished">February 5, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。</p>
+<a id="more"></a>
+
+<h2 id="启动入口"><a href="#启动入口" class="headerlink" title="启动入口"></a>启动入口</h2><p>kubelet 的主函数入口在 <code>cmd/kubelet/kubelet.go</code>中，启动代码很简洁：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	rand.Seed(time.Now().UnixNano())</span><br><span class="line">    <span class="comment">// 这里则是启动 kubelet 服务进程，返回一个*cobra.Command</span></span><br><span class="line">	command := app.NewKubeletCommand(server.SetupSignalHandler())</span><br><span class="line">	logs.InitLogs()</span><br><span class="line">	<span class="keyword">defer</span> logs.FlushLogs()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := command.Execute(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Fprintf(os.Stderr, <span class="string">"%v\n"</span>, err)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>app.NewKubeletCommand</code> 函数则是对 kubelet 进行参数化配置并启动 kubelet，然后生成kubelet对象以及该kubelet维护pod所需要用到的服务。主要步骤如下</p>
+<ol>
+<li><p>解析参数，加载当前flag，对参数的合法性进行判断。flag 包含两种：</p>
+<ul>
+<li>kubeletFlags：kubelet – 后追加的参数</li>
+<li>kubeletConfig： 通过解析特定配置文件获取</li>
+</ul>
+</li>
+<li><p>构造 cobra.Command 对象，此对象用于执行用户输入的命令行交互。此对象结构体为</p>
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">   &#123;</span><br><span class="line">	Use: componentKubelet,</span><br><span class="line">	Long: ...,</span><br><span class="line">	<span class="comment">// The Kubelet has special flag parsing requirements to enforce flag precedence rules,</span></span><br><span class="line">	<span class="comment">// so we do all our parsing manually in Run, below.</span></span><br><span class="line">	<span class="comment">// DisableFlagParsing=true provides the full set of flags passed to the kubelet in the</span></span><br><span class="line">	<span class="comment">// `args` arg to Run, without Cobra's interference.</span></span><br><span class="line">	DisableFlagParsing: <span class="literal">true</span>,</span><br><span class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;...</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 其中的 <code>Run</code> 则是用于具体执行用户命令的函数，这个函数的流程也就是 kubelet的主流程，创建 kubelet 对象，创建各种服务。</p>
+</li>
+</ol>
+<h2 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h2><p>这一部分解析一下 Run 函数。首先我们需要了解两个比较重要的配置结构体<code>KubeletFlags</code> <code>kubeletconfig.KubeletConfiguration</code>，其主要结构如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> KubeletFlags <span class="keyword">struct</span> &#123;</span><br><span class="line">	KubeConfig          <span class="keyword">string</span></span><br><span class="line">	BootstrapKubeconfig <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 用于在调用 master 相关接口时，增加的**混沌属性**</span></span><br><span class="line">	ChaosChance <span class="keyword">float64</span></span><br><span class="line">	<span class="comment">// 有错误立刻返回并中断，而非吃掉异常</span></span><br><span class="line">	ReallyCrashForTesting <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// TODO(mtaufen): It is increasingly looking like nobody actually uses the</span></span><br><span class="line">	<span class="comment">//                Kubelet's runonce mode anymore, so it may be a candidate</span></span><br><span class="line">	<span class="comment">//                for deprecation and removal.</span></span><br><span class="line">	<span class="comment">// If runOnce is true, the Kubelet will check the API server once for pods,</span></span><br><span class="line">	<span class="comment">// run those in addition to the pods specified by static pod files, and exit.</span></span><br><span class="line">	RunOnce <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// enableServer enables the Kubelet's server</span></span><br><span class="line">	EnableServer <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// HostnameOverride is the hostname used to identify the kubelet instead</span></span><br><span class="line">	<span class="comment">// of the actual hostname.</span></span><br><span class="line">	HostnameOverride <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// NodeIP is IP address of the node.</span></span><br><span class="line">	<span class="comment">// If set, kubelet will use this IP address for the node.</span></span><br><span class="line">	NodeIP <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// This flag, if set, sets the unique id of the instance that an external provider (i.e. cloudprovider)</span></span><br><span class="line">	<span class="comment">// can use to identify a specific node</span></span><br><span class="line">	ProviderID <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Container-runtime-specific options.</span></span><br><span class="line">	config.ContainerRuntimeOptions</span><br><span class="line"></span><br><span class="line">	<span class="comment">// certDirectory is the directory where the TLS certs are located (by</span></span><br><span class="line">	<span class="comment">// default /var/run/kubernetes). If tlsCertFile and tlsPrivateKeyFile</span></span><br><span class="line">	<span class="comment">// are provided, this flag will be ignored.</span></span><br><span class="line">	CertDirectory <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// cloudProvider is the provider for cloud services.</span></span><br><span class="line">	<span class="comment">// +optional</span></span><br><span class="line">	CloudProvider <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// cloudConfigFile is the path to the cloud provider configuration file.</span></span><br><span class="line">	<span class="comment">// +optional</span></span><br><span class="line">	CloudConfigFile <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// rootDirectory is the directory path to place kubelet files (volume</span></span><br><span class="line">	<span class="comment">// mounts,etc).</span></span><br><span class="line">	RootDirectory <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// The Kubelet will use this directory for checkpointing downloaded configurations and tracking configuration health.</span></span><br><span class="line">	<span class="comment">// The Kubelet will create this directory if it does not already exist.</span></span><br><span class="line">	<span class="comment">// The path may be absolute or relative; relative paths are under the Kubelet's current working directory.</span></span><br><span class="line">	<span class="comment">// Providing this flag enables dynamic kubelet configuration.</span></span><br><span class="line">	<span class="comment">// To use this flag, the DynamicKubeletConfig feature gate must be enabled.</span></span><br><span class="line">	DynamicConfigDir cliflag.StringFlag</span><br><span class="line"></span><br><span class="line">	<span class="comment">// The Kubelet will load its initial configuration from this file.</span></span><br><span class="line">	<span class="comment">// The path may be absolute or relative; relative paths are under the Kubelet's current working directory.</span></span><br><span class="line">	<span class="comment">// Omit this flag to use the combination of built-in default configuration values and flags.</span></span><br><span class="line">	KubeletConfigFile <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// registerNode enables automatic registration with the apiserver.</span></span><br><span class="line">	RegisterNode <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// registerWithTaints are an array of taints to add to a node object when</span></span><br><span class="line">	<span class="comment">// the kubelet registers itself. This only takes effect when registerNode</span></span><br><span class="line">	<span class="comment">// is true and upon the initial registration of the node.</span></span><br><span class="line">	RegisterWithTaints []core.Taint</span><br><span class="line"></span><br><span class="line">	<span class="comment">// WindowsService should be set to true if kubelet is running as a service on Windows.</span></span><br><span class="line">	<span class="comment">// Its corresponding flag only gets registered in Windows builds.</span></span><br><span class="line">	WindowsService <span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// EXPERIMENTAL FLAGS</span></span><br><span class="line">	<span class="comment">// Whitelist of unsafe sysctls or sysctl patterns (ending in *).</span></span><br><span class="line">	<span class="comment">// +optional</span></span><br><span class="line">	AllowedUnsafeSysctls []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// containerized should be set to true if kubelet is running in a container.</span></span><br><span class="line">	Containerized <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// remoteRuntimeEndpoint is the endpoint of remote runtime service</span></span><br><span class="line">	RemoteRuntimeEndpoint <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// remoteImageEndpoint is the endpoint of remote image service</span></span><br><span class="line">	RemoteImageEndpoint <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// experimentalMounterPath is the path of mounter binary. Leave empty to use the default mount path</span></span><br><span class="line">	ExperimentalMounterPath <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// If enabled, the kubelet will integrate with the kernel memcg notification to determine if memory eviction thresholds are crossed rather than polling.</span></span><br><span class="line">	<span class="comment">// +optional</span></span><br><span class="line">	ExperimentalKernelMemcgNotification <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// This flag, if set, enables a check prior to mount operations to verify that the required components</span></span><br><span class="line">	<span class="comment">// (binaries, etc.) to mount the volume are available on the underlying node. If the check is enabled</span></span><br><span class="line">	<span class="comment">// and fails the mount operation fails.</span></span><br><span class="line">	ExperimentalCheckNodeCapabilitiesBeforeMount <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// This flag, if set, will avoid including `EvictionHard` limits while computing Node Allocatable.</span></span><br><span class="line">	<span class="comment">// Refer to [Node Allocatable](https://git.k8s.io/community/contributors/design-proposals/node/node-allocatable.md) doc for more information.</span></span><br><span class="line">	ExperimentalNodeAllocatableIgnoreEvictionThreshold <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// Node Labels are the node labels to add when registering the node in the cluster</span></span><br><span class="line">	NodeLabels <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// volumePluginDir is the full path of the directory in which to search</span></span><br><span class="line">	<span class="comment">// for additional third party volume plugins</span></span><br><span class="line">	VolumePluginDir <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// lockFilePath is the path that kubelet will use to as a lock file.</span></span><br><span class="line">	<span class="comment">// It uses this file as a lock to synchronize with other kubelet processes</span></span><br><span class="line">	<span class="comment">// that may be running.</span></span><br><span class="line">	LockFilePath <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// ExitOnLockContention is a flag that signifies to the kubelet that it is running</span></span><br><span class="line">	<span class="comment">// in "bootstrap" mode. This requires that 'LockFilePath' has been set.</span></span><br><span class="line">	<span class="comment">// This will cause the kubelet to listen to inotify events on the lock file,</span></span><br><span class="line">	<span class="comment">// releasing it and exiting when another process tries to open that file.</span></span><br><span class="line">	ExitOnLockContention <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// seccompProfileRoot is the directory path for seccomp profiles.</span></span><br><span class="line">	SeccompProfileRoot <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// bootstrapCheckpointPath is the path to the directory containing pod checkpoints to</span></span><br><span class="line">	<span class="comment">// run on restore</span></span><br><span class="line">	BootstrapCheckpointPath <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// NodeStatusMaxImages caps the number of images reported in Node.Status.Images.</span></span><br><span class="line">	<span class="comment">// This is an experimental, short-term flag to help with node scalability.</span></span><br><span class="line">	NodeStatusMaxImages <span class="keyword">int32</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// DEPRECATED FLAGS</span></span><br><span class="line">	<span class="comment">// minimumGCAge is the minimum age for a finished container before it is</span></span><br><span class="line">	<span class="comment">// garbage collected.</span></span><br><span class="line">	MinimumGCAge metav1.Duration</span><br><span class="line">	<span class="comment">// maxPerPodContainerCount is the maximum number of old instances to</span></span><br><span class="line">	<span class="comment">// retain per container. Each container takes up some disk space.</span></span><br><span class="line">	MaxPerPodContainerCount <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// maxContainerCount is the maximum number of old instances of containers</span></span><br><span class="line">	<span class="comment">// to retain globally. Each container takes up some disk space.</span></span><br><span class="line">	MaxContainerCount <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// masterServiceNamespace is The namespace from which the kubernetes</span></span><br><span class="line">	<span class="comment">// master services should be injected into pods.</span></span><br><span class="line">	MasterServiceNamespace <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// registerSchedulable tells the kubelet to register the node as</span></span><br><span class="line">	<span class="comment">// schedulable. Won't have any effect if register-node is false.</span></span><br><span class="line">	<span class="comment">// DEPRECATED: use registerWithTaints instead</span></span><br><span class="line">	RegisterSchedulable <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// nonMasqueradeCIDR configures masquerading: traffic to IPs outside this range will use IP masquerade.</span></span><br><span class="line">	NonMasqueradeCIDR <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// This flag, if set, instructs the kubelet to keep volumes from terminated pods mounted to the node.</span></span><br><span class="line">	<span class="comment">// This can be useful for debugging volume related issues.</span></span><br><span class="line">	KeepTerminatedPodVolumes <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// allowPrivileged enables containers to request privileged mode.</span></span><br><span class="line">	<span class="comment">// Defaults to true.</span></span><br><span class="line">	AllowPrivileged <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// hostNetworkSources is a comma-separated list of sources from which the</span></span><br><span class="line">	<span class="comment">// Kubelet allows pods to use of host network. Defaults to "*". Valid</span></span><br><span class="line">	<span class="comment">// options are "file", "http", "api", and "*" (all sources).</span></span><br><span class="line">	HostNetworkSources []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// hostPIDSources is a comma-separated list of sources from which the</span></span><br><span class="line">	<span class="comment">// Kubelet allows pods to use the host pid namespace. Defaults to "*".</span></span><br><span class="line">	HostPIDSources []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// hostIPCSources is a comma-separated list of sources from which the</span></span><br><span class="line">	<span class="comment">// Kubelet allows pods to use the host ipc namespace. Defaults to "*".</span></span><br><span class="line">	HostIPCSources []<span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> KubeletConfiguration <span class="keyword">struct</span> &#123;</span><br><span class="line">	metav1.TypeMeta</span><br><span class="line"></span><br><span class="line">	<span class="comment">// staticPodPath is the path to the directory containing local (static) pods to</span></span><br><span class="line">	<span class="comment">// run, or the path to a single static pod file.</span></span><br><span class="line">	StaticPodPath <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// syncFrequency is the max period between synchronizing running</span></span><br><span class="line">	<span class="comment">// containers and config</span></span><br><span class="line">	SyncFrequency metav1.Duration</span><br><span class="line">	<span class="comment">// fileCheckFrequency is the duration between checking config files for</span></span><br><span class="line">	<span class="comment">// new data</span></span><br><span class="line">	FileCheckFrequency metav1.Duration</span><br><span class="line">	<span class="comment">// httpCheckFrequency is the duration between checking http for new data</span></span><br><span class="line">	HTTPCheckFrequency metav1.Duration</span><br><span class="line">	<span class="comment">// staticPodURL is the URL for accessing static pods to run</span></span><br><span class="line">	StaticPodURL <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// staticPodURLHeader is a map of slices with HTTP headers to use when accessing the podURL</span></span><br><span class="line">	StaticPodURLHeader <span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// address is the IP address for the Kubelet to serve on (set to 0.0.0.0</span></span><br><span class="line">	<span class="comment">// for all interfaces)</span></span><br><span class="line">	Address <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// port is the port for the Kubelet to serve on.</span></span><br><span class="line">	Port <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// readOnlyPort is the read-only port for the Kubelet to serve on with</span></span><br><span class="line">	<span class="comment">// no authentication/authorization (set to 0 to disable)</span></span><br><span class="line">	ReadOnlyPort <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// tlsCertFile is the file containing x509 Certificate for HTTPS.  (CA cert,</span></span><br><span class="line">	<span class="comment">// if any, concatenated after server cert). If tlsCertFile and</span></span><br><span class="line">	<span class="comment">// tlsPrivateKeyFile are not provided, a self-signed certificate</span></span><br><span class="line">	<span class="comment">// and key are generated for the public address and saved to the directory</span></span><br><span class="line">	<span class="comment">// passed to the Kubelet's --cert-dir flag.</span></span><br><span class="line">	TLSCertFile <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// tlsPrivateKeyFile is the file containing x509 private key matching tlsCertFile</span></span><br><span class="line">	TLSPrivateKeyFile <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// TLSCipherSuites is the list of allowed cipher suites for the server.</span></span><br><span class="line">	<span class="comment">// Values are from tls package constants (https://golang.org/pkg/crypto/tls/#pkg-constants).</span></span><br><span class="line">	TLSCipherSuites []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// TLSMinVersion is the minimum TLS version supported.</span></span><br><span class="line">	<span class="comment">// Values are from tls package constants (https://golang.org/pkg/crypto/tls/#pkg-constants).</span></span><br><span class="line">	TLSMinVersion <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// rotateCertificates enables client certificate rotation. The Kubelet will request a</span></span><br><span class="line">	<span class="comment">// new certificate from the certificates.k8s.io API. This requires an approver to approve the</span></span><br><span class="line">	<span class="comment">// certificate signing requests. The RotateKubeletClientCertificate feature</span></span><br><span class="line">	<span class="comment">// must be enabled.</span></span><br><span class="line">	RotateCertificates <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// serverTLSBootstrap enables server certificate bootstrap. Instead of self</span></span><br><span class="line">	<span class="comment">// signing a serving certificate, the Kubelet will request a certificate from</span></span><br><span class="line">	<span class="comment">// the certificates.k8s.io API. This requires an approver to approve the</span></span><br><span class="line">	<span class="comment">// certificate signing requests. The RotateKubeletServerCertificate feature</span></span><br><span class="line">	<span class="comment">// must be enabled.</span></span><br><span class="line">	ServerTLSBootstrap <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// authentication specifies how requests to the Kubelet's server are authenticated</span></span><br><span class="line">	Authentication KubeletAuthentication</span><br><span class="line">	<span class="comment">// authorization specifies how requests to the Kubelet's server are authorized</span></span><br><span class="line">	Authorization KubeletAuthorization</span><br><span class="line">	<span class="comment">// registryPullQPS is the limit of registry pulls per second.</span></span><br><span class="line">	<span class="comment">// Set to 0 for no limit.</span></span><br><span class="line">	RegistryPullQPS <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// registryBurst is the maximum size of bursty pulls, temporarily allows</span></span><br><span class="line">	<span class="comment">// pulls to burst to this number, while still not exceeding registryPullQPS.</span></span><br><span class="line">	<span class="comment">// Only used if registryPullQPS &gt; 0.</span></span><br><span class="line">	RegistryBurst <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// eventRecordQPS is the maximum event creations per second. If 0, there</span></span><br><span class="line">	<span class="comment">// is no limit enforced.</span></span><br><span class="line">	EventRecordQPS <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// eventBurst is the maximum size of a burst of event creations, temporarily</span></span><br><span class="line">	<span class="comment">// allows event creations to burst to this number, while still not exceeding</span></span><br><span class="line">	<span class="comment">// eventRecordQPS. Only used if eventRecordQPS &gt; 0.</span></span><br><span class="line">	EventBurst <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// enableDebuggingHandlers enables server endpoints for log collection</span></span><br><span class="line">	<span class="comment">// and local running of containers and commands</span></span><br><span class="line">	EnableDebuggingHandlers <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// enableContentionProfiling enables lock contention profiling, if enableDebuggingHandlers is true.</span></span><br><span class="line">	EnableContentionProfiling <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// healthzPort is the port of the localhost healthz endpoint (set to 0 to disable)</span></span><br><span class="line">	HealthzPort <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// healthzBindAddress is the IP address for the healthz server to serve on</span></span><br><span class="line">	HealthzBindAddress <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// oomScoreAdj is The oom-score-adj value for kubelet process. Values</span></span><br><span class="line">	<span class="comment">// must be within the range [-1000, 1000].</span></span><br><span class="line">	OOMScoreAdj <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// clusterDomain is the DNS domain for this cluster. If set, kubelet will</span></span><br><span class="line">	<span class="comment">// configure all containers to search this domain in addition to the</span></span><br><span class="line">	<span class="comment">// host's search domains.</span></span><br><span class="line">	ClusterDomain <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// clusterDNS is a list of IP addresses for a cluster DNS server. If set,</span></span><br><span class="line">	<span class="comment">// kubelet will configure all containers to use this for DNS resolution</span></span><br><span class="line">	<span class="comment">// instead of the host's DNS servers.</span></span><br><span class="line">	ClusterDNS []<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// streamingConnectionIdleTimeout is the maximum time a streaming connection</span></span><br><span class="line">	<span class="comment">// can be idle before the connection is automatically closed.</span></span><br><span class="line">	StreamingConnectionIdleTimeout metav1.Duration</span><br><span class="line">	<span class="comment">// nodeStatusUpdateFrequency is the frequency that kubelet computes node</span></span><br><span class="line">	<span class="comment">// status. If node lease feature is not enabled, it is also the frequency that</span></span><br><span class="line">	<span class="comment">// kubelet posts node status to master. In that case, be cautious when</span></span><br><span class="line">	<span class="comment">// changing the constant, it must work with nodeMonitorGracePeriod in nodecontroller.</span></span><br><span class="line">	NodeStatusUpdateFrequency metav1.Duration</span><br><span class="line">	<span class="comment">// nodeStatusReportFrequency is the frequency that kubelet posts node</span></span><br><span class="line">	<span class="comment">// status to master if node status does not change. Kubelet will ignore this</span></span><br><span class="line">	<span class="comment">// frequency and post node status immediately if any change is detected. It is</span></span><br><span class="line">	<span class="comment">// only used when node lease feature is enabled.</span></span><br><span class="line">	NodeStatusReportFrequency metav1.Duration</span><br><span class="line">	<span class="comment">// nodeLeaseDurationSeconds is the duration the Kubelet will set on its corresponding Lease.</span></span><br><span class="line">	NodeLeaseDurationSeconds <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// imageMinimumGCAge is the minimum age for an unused image before it is</span></span><br><span class="line">	<span class="comment">// garbage collected.</span></span><br><span class="line">	ImageMinimumGCAge metav1.Duration</span><br><span class="line">	<span class="comment">// imageGCHighThresholdPercent is the percent of disk usage after which</span></span><br><span class="line">	<span class="comment">// image garbage collection is always run. The percent is calculated as</span></span><br><span class="line">	<span class="comment">// this field value out of 100.</span></span><br><span class="line">	ImageGCHighThresholdPercent <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// imageGCLowThresholdPercent is the percent of disk usage before which</span></span><br><span class="line">	<span class="comment">// image garbage collection is never run. Lowest disk usage to garbage</span></span><br><span class="line">	<span class="comment">// collect to. The percent is calculated as this field value out of 100.</span></span><br><span class="line">	ImageGCLowThresholdPercent <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// How frequently to calculate and cache volume disk usage for all pods</span></span><br><span class="line">	VolumeStatsAggPeriod metav1.Duration</span><br><span class="line">	<span class="comment">// KubeletCgroups is the absolute name of cgroups to isolate the kubelet in</span></span><br><span class="line">	KubeletCgroups <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// SystemCgroups is absolute name of cgroups in which to place</span></span><br><span class="line">	<span class="comment">// all non-kernel processes that are not already in a container. Empty</span></span><br><span class="line">	<span class="comment">// for no container. Rolling back the flag requires a reboot.</span></span><br><span class="line">	SystemCgroups <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// CgroupRoot is the root cgroup to use for pods.</span></span><br><span class="line">	<span class="comment">// If CgroupsPerQOS is enabled, this is the root of the QoS cgroup hierarchy.</span></span><br><span class="line">	CgroupRoot <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Enable QoS based Cgroup hierarchy: top level cgroups for QoS Classes</span></span><br><span class="line">	<span class="comment">// And all Burstable and BestEffort pods are brought up under their</span></span><br><span class="line">	<span class="comment">// specific top level QoS cgroup.</span></span><br><span class="line">	CgroupsPerQOS <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// driver that the kubelet uses to manipulate cgroups on the host (cgroupfs or systemd)</span></span><br><span class="line">	CgroupDriver <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// CPUManagerPolicy is the name of the policy to use.</span></span><br><span class="line">	<span class="comment">// Requires the CPUManager feature gate to be enabled.</span></span><br><span class="line">	CPUManagerPolicy <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// CPU Manager reconciliation period.</span></span><br><span class="line">	<span class="comment">// Requires the CPUManager feature gate to be enabled.</span></span><br><span class="line">	CPUManagerReconcilePeriod metav1.Duration</span><br><span class="line">	<span class="comment">// Map of QoS resource reservation percentages (memory only for now).</span></span><br><span class="line">	<span class="comment">// Requires the QOSReserved feature gate to be enabled.</span></span><br><span class="line">	QOSReserved <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// runtimeRequestTimeout is the timeout for all runtime requests except long running</span></span><br><span class="line">	<span class="comment">// requests - pull, logs, exec and attach.</span></span><br><span class="line">	RuntimeRequestTimeout metav1.Duration</span><br><span class="line">	<span class="comment">// hairpinMode specifies how the Kubelet should configure the container</span></span><br><span class="line">	<span class="comment">// bridge for hairpin packets.</span></span><br><span class="line">	<span class="comment">// Setting this flag allows endpoints in a Service to loadbalance back to</span></span><br><span class="line">	<span class="comment">// themselves if they should try to access their own Service. Values:</span></span><br><span class="line">	<span class="comment">//   "promiscuous-bridge": make the container bridge promiscuous.</span></span><br><span class="line">	<span class="comment">//   "hairpin-veth":       set the hairpin flag on container veth interfaces.</span></span><br><span class="line">	<span class="comment">//   "none":               do nothing.</span></span><br><span class="line">	<span class="comment">// Generally, one must set --hairpin-mode=hairpin-veth to achieve hairpin NAT,</span></span><br><span class="line">	<span class="comment">// because promiscuous-bridge assumes the existence of a container bridge named cbr0.</span></span><br><span class="line">	HairpinMode <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// maxPods is the number of pods that can run on this Kubelet.</span></span><br><span class="line">	MaxPods <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// The CIDR to use for pod IP addresses, only used in standalone mode.</span></span><br><span class="line">	<span class="comment">// In cluster mode, this is obtained from the master.</span></span><br><span class="line">	PodCIDR <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// The maximum number of processes per pod.  If -1, the kubelet defaults to the node allocatable pid capacity.</span></span><br><span class="line">	PodPidsLimit <span class="keyword">int64</span></span><br><span class="line">	<span class="comment">// ResolverConfig is the resolver configuration file used as the basis</span></span><br><span class="line">	<span class="comment">// for the container DNS resolution configuration.</span></span><br><span class="line">	ResolverConfig <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// cpuCFSQuota enables CPU CFS quota enforcement for containers that</span></span><br><span class="line">	<span class="comment">// specify CPU limits</span></span><br><span class="line">	CPUCFSQuota <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// CPUCFSQuotaPeriod sets the CPU CFS quota period value, cpu.cfs_period_us, defaults to 100ms</span></span><br><span class="line">	CPUCFSQuotaPeriod metav1.Duration</span><br><span class="line">	<span class="comment">// maxOpenFiles is Number of files that can be opened by Kubelet process.</span></span><br><span class="line">	MaxOpenFiles <span class="keyword">int64</span></span><br><span class="line">	<span class="comment">// contentType is contentType of requests sent to apiserver.</span></span><br><span class="line">	ContentType <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// kubeAPIQPS is the QPS to use while talking with kubernetes apiserver</span></span><br><span class="line">	KubeAPIQPS <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// kubeAPIBurst is the burst to allow while talking with kubernetes</span></span><br><span class="line">	<span class="comment">// apiserver</span></span><br><span class="line">	KubeAPIBurst <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// serializeImagePulls when enabled, tells the Kubelet to pull images one at a time.</span></span><br><span class="line">	SerializeImagePulls <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// Map of signal names to quantities that defines hard eviction thresholds. For example: &#123;"memory.available": "300Mi"&#125;.</span></span><br><span class="line">	EvictionHard <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Map of signal names to quantities that defines soft eviction thresholds.  For example: &#123;"memory.available": "300Mi"&#125;.</span></span><br><span class="line">	EvictionSoft <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Map of signal names to quantities that defines grace periods for each soft eviction signal. For example: &#123;"memory.available": "30s"&#125;.</span></span><br><span class="line">	EvictionSoftGracePeriod <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Duration for which the kubelet has to wait before transitioning out of an eviction pressure condition.</span></span><br><span class="line">	EvictionPressureTransitionPeriod metav1.Duration</span><br><span class="line">	<span class="comment">// Maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.</span></span><br><span class="line">	EvictionMaxPodGracePeriod <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// Map of signal names to quantities that defines minimum reclaims, which describe the minimum</span></span><br><span class="line">	<span class="comment">// amount of a given resource the kubelet will reclaim when performing a pod eviction while</span></span><br><span class="line">	<span class="comment">// that resource is under pressure. For example: &#123;"imagefs.available": "2Gi"&#125;</span></span><br><span class="line">	EvictionMinimumReclaim <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// podsPerCore is the maximum number of pods per core. Cannot exceed MaxPods.</span></span><br><span class="line">	<span class="comment">// If 0, this field is ignored.</span></span><br><span class="line">	PodsPerCore <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// enableControllerAttachDetach enables the Attach/Detach controller to</span></span><br><span class="line">	<span class="comment">// manage attachment/detachment of volumes scheduled to this node, and</span></span><br><span class="line">	<span class="comment">// disables kubelet from executing any attach/detach operations</span></span><br><span class="line">	EnableControllerAttachDetach <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// protectKernelDefaults, if true, causes the Kubelet to error if kernel</span></span><br><span class="line">	<span class="comment">// flags are not as it expects. Otherwise the Kubelet will attempt to modify</span></span><br><span class="line">	<span class="comment">// kernel flags to match its expectation.</span></span><br><span class="line">	ProtectKernelDefaults <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// If true, Kubelet ensures a set of iptables rules are present on host.</span></span><br><span class="line">	<span class="comment">// These rules will serve as utility for various components, e.g. kube-proxy.</span></span><br><span class="line">	<span class="comment">// The rules will be created based on IPTablesMasqueradeBit and IPTablesDropBit.</span></span><br><span class="line">	MakeIPTablesUtilChains <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// iptablesMasqueradeBit is the bit of the iptables fwmark space to mark for SNAT</span></span><br><span class="line">	<span class="comment">// Values must be within the range [0, 31]. Must be different from other mark bits.</span></span><br><span class="line">	<span class="comment">// Warning: Please match the value of the corresponding parameter in kube-proxy.</span></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> clean up IPTablesMasqueradeBit in kube-proxy</span></span><br><span class="line">	IPTablesMasqueradeBit <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// iptablesDropBit is the bit of the iptables fwmark space to mark for dropping packets.</span></span><br><span class="line">	<span class="comment">// Values must be within the range [0, 31]. Must be different from other mark bits.</span></span><br><span class="line">	IPTablesDropBit <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// featureGates is a map of feature names to bools that enable or disable alpha/experimental</span></span><br><span class="line">	<span class="comment">// features. This field modifies piecemeal the built-in default values from</span></span><br><span class="line">	<span class="comment">// "k8s.io/kubernetes/pkg/features/kube_features.go".</span></span><br><span class="line">	FeatureGates <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// Tells the Kubelet to fail to start if swap is enabled on the node.</span></span><br><span class="line">	FailSwapOn <span class="keyword">bool</span></span><br><span class="line">	<span class="comment">// A quantity defines the maximum size of the container log file before it is rotated. For example: "5Mi" or "256Ki".</span></span><br><span class="line">	ContainerLogMaxSize <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// Maximum number of container log files that can be present for a container.</span></span><br><span class="line">	ContainerLogMaxFiles <span class="keyword">int32</span></span><br><span class="line">	<span class="comment">// ConfigMapAndSecretChangeDetectionStrategy is a mode in which config map and secret managers are running.</span></span><br><span class="line">	ConfigMapAndSecretChangeDetectionStrategy ResourceChangeDetectionStrategy</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* the following fields are meant for Node Allocatable */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// A set of ResourceName=ResourceQuantity (e.g. cpu=200m,memory=150G,pids=100) pairs</span></span><br><span class="line">	<span class="comment">// that describe resources reserved for non-kubernetes components.</span></span><br><span class="line">	<span class="comment">// Currently only cpu and memory are supported.</span></span><br><span class="line">	<span class="comment">// See http://kubernetes.io/docs/user-guide/compute-resources for more detail.</span></span><br><span class="line">	SystemReserved <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// A set of ResourceName=ResourceQuantity (e.g. cpu=200m,memory=150G,pids=100) pairs</span></span><br><span class="line">	<span class="comment">// that describe resources reserved for kubernetes system components.</span></span><br><span class="line">	<span class="comment">// Currently cpu, memory and local ephemeral storage for root file system are supported.</span></span><br><span class="line">	<span class="comment">// See http://kubernetes.io/docs/user-guide/compute-resources for more detail.</span></span><br><span class="line">	KubeReserved <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">	<span class="comment">// This flag helps kubelet identify absolute name of top level cgroup used to enforce `SystemReserved` compute resource reservation for OS system daemons.</span></span><br><span class="line">	<span class="comment">// Refer to [Node Allocatable](https://git.k8s.io/community/contributors/design-proposals/node/node-allocatable.md) doc for more information.</span></span><br><span class="line">	SystemReservedCgroup <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// This flag helps kubelet identify absolute name of top level cgroup used to enforce `KubeReserved` compute resource reservation for Kubernetes node system daemons.</span></span><br><span class="line">	<span class="comment">// Refer to [Node Allocatable](https://git.k8s.io/community/contributors/design-proposals/node/node-allocatable.md) doc for more information.</span></span><br><span class="line">	KubeReservedCgroup <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// This flag specifies the various Node Allocatable enforcements that Kubelet needs to perform.</span></span><br><span class="line">	<span class="comment">// This flag accepts a list of options. Acceptable options are `pods`, `system-reserved` &amp; `kube-reserved`.</span></span><br><span class="line">	<span class="comment">// Refer to [Node Allocatable](https://git.k8s.io/community/contributors/design-proposals/node/node-allocatable.md) doc for more information.</span></span><br><span class="line">	EnforceNodeAllocatable []<span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动流程如下：</p>
+<ol>
+<li><p>新建一个watch的功能，主要是用来watch kubelet的配置文件是否改变，如果已经改变，那么就重新load kubelet的配置文件 用的是kubernetes常用到的Controller,也就是Informer的架构，watch ConfigMap对象</p>
+<blockquote>
+<p>controller 相关代码在 <code>pkg/kubelet/kubeletconfig/controller.go</code>中 <em>//TODO 介绍下 controller informer 机制</em></p>
+</blockquote>
+</li>
+<li><p>构造 Kubelet server对象，<br>kubelet server 对象由 kubelet 各种配置组成，其结构体如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">type</span> KubeletServer <span class="keyword">struct</span> &#123;</span><br><span class="line">KubeletFlags</span><br><span class="line">kubeletconfig.KubeletConfiguration</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据 server 创建 <code>kubeletDeps</code>对象，它并不会启动任何进程，仅返回适合运行的依赖项或错误。这个是比较重要的部分，其结构体为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> kubelet.Dependencies&#123;</span><br><span class="line">Auth:                <span class="literal">nil</span>, <span class="comment">// default does not enforce auth[nz]</span></span><br><span class="line">CAdvisorInterface:   <span class="literal">nil</span>, <span class="comment">// cadvisor.New launches background processes (bg http.ListenAndServe, and some bg cleaners), not set here</span></span><br><span class="line">Cloud:               <span class="literal">nil</span>, <span class="comment">// cloud provider might start background processes</span></span><br><span class="line">ContainerManager:    <span class="literal">nil</span>,</span><br><span class="line">DockerClientConfig:  dockerClientConfig,</span><br><span class="line">KubeClient:          <span class="literal">nil</span>,</span><br><span class="line">HeartbeatClient:     <span class="literal">nil</span>,</span><br><span class="line">EventClient:         <span class="literal">nil</span>,</span><br><span class="line">Mounter:             mounter,</span><br><span class="line">Subpather:           subpather,</span><br><span class="line">OOMAdjuster:         oom.NewOOMAdjuster(),</span><br><span class="line">OSInterface:         kubecontainer.RealOS&#123;&#125;,</span><br><span class="line">VolumePlugins:       ProbeVolumePlugins(),</span><br><span class="line">DynamicPluginProber: GetDynamicPluginProber(s.VolumePluginDir, pluginRunner),</span><br><span class="line">      TLSOptions:          tlsOptions&#125;, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，返回的这些包含底层docker 客户端、挂载器等。其实就是可以供 server 使用的工具包。</p>
+</li>
+<li><p>执行 Run 函数，启动 kubelet。注意此 Run 函数并非上文的 Command 中的 Run</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">(s *options.KubeletServer, kubeDeps *kubelet.Dependencies, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// To help debugging, immediately log version</span></span><br><span class="line">     klog.Infof(<span class="string">"Version: %+v"</span>, version.Get())</span><br><span class="line">     <span class="comment">// 这里是针对 windows 系统的初始化操作</span></span><br><span class="line">  <span class="keyword">if</span> err := initForOS(s.KubeletFlags.WindowsService); err !=  <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> fmt.Errorf(<span class="string">"failed OS init: %v"</span>, err)</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">// 这里启动 kubelet</span></span><br><span class="line">  <span class="keyword">if</span> err := run(s, kubeDeps, stopCh); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> fmt.Errorf(<span class="string">"failed to run Kubelet: %v"</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<p>   调用的 <code>func run</code> 将会执行以下一系列操作：</p>
+<ol>
+<li>通过<code>SetFromMap</code>设置 kubelet 的 feature Gate</li>
+<li>验证初始化的 server</li>
+<li>注册端点 <code>/configz</code></li>
+<li>获取并配置各种客户端，包括：<ul>
+<li>kubeclient</li>
+<li>事件 client</li>
+<li>心跳客户端</li>
+<li>cadvisor客户端</li>
+</ul>
+</li>
+<li>初始化 container manager</li>
+<li>进行权限验证，需要以 uid 为 0 的用户启动。</li>
+<li>调用 <code>RunKubelet</code></li>
+</ol>
+<h4 id="调用-RunKubelet"><a href="#调用-RunKubelet" class="headerlink" title="调用 RunKubelet"></a>调用 RunKubelet</h4><p>RunKubelet 主要流程：</p>
+<ol>
+<li>获取主机名</li>
+<li>建立并初始化 event recorder</li>
+<li>获取以下资源(均读取自 <code>KubeletFlags</code>)：<ul>
+<li>hostNetworkSources</li>
+<li>hostPIDSources</li>
+<li>hostIPCSources</li>
+<li>privilegedSources</li>
+</ul>
+</li>
+<li>若设置 <code>runonce</code> 参数，则只拉取一次容器组配置，并在启动容器组后退出，否则将以 server 形式保持</li>
+</ol>
+<ul>
+<li><p>对于runonce，首先创建所需的目录，监听 pod update 信息，得到 pod 信息后，创建pod 并返回他们的状态</p>
+</li>
+<li><p>以 server 模式启动，流程如下：</p>
+<ol>
+<li>检查 logserver 以及 apiserver 是否可用</li>
+<li>如有 cloud provider 配置， 则启动<code>cloudResourceSyncManager</code></li>
+<li>启动 volumeManager</li>
+<li>调用 <code>kubelet.syncNodeStatus</code>同步 node 状态</li>
+<li>调用 <code>kubelet.updateRuntimeUp</code>同步 <code>runtimeState</code> 中的容器的 runtime uptime</li>
+<li>开启循环，同步 iptables 规则</li>
+<li>启动一个用于“杀死pod” 的 goroutine</li>
+<li>启动 statusManager 和 probeManager （都是无限循环的同步机制）</li>
+<li>启动 runtimeclass manager （<strong>注意这里与替换底层容器相关</strong>）</li>
+<li>启动 pleg （pod lifecycle event generator）</li>
+</ol>
+<p>至此，kubelet 整体的启动流程完毕，进入无限循环中，实时同步不同组件的状态。同时也对端口进行监听，响应 http 请求。</p>
+</li>
+</ul>
+<blockquote>
+<p>如何与 pod 交互则在下篇介绍</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/源码分析/">源码分析</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kubelet/">kubelet</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/CNCF周报-2.09.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CNCF周报-2.09
+        
+      </div>
+    </a>
+  
+  
+    <a href="/KubeWeekly-201.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CNCF 周报 2020-2-2</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动入口"><span class="nav-number">1.</span> <span class="nav-text">启动入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动流程"><span class="nav-number">2.</span> <span class="nav-text">启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#调用-RunKubelet"><span class="nav-number">2.0.1.</span> <span class="nav-text">调用 RunKubelet</span></a></li></ol></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

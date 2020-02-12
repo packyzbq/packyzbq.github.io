@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>istio-生产环境搭建 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="istio">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="在前一阵的工作中，涉及istio 平台的搭建和开发，本篇文章记录下整体的搭建流程">
+<meta name="keywords" content="istio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio-生产环境搭建">
+<meta property="og:url" content="http://packyzbq.github.io/istio-生产环境搭建.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="在前一阵的工作中，涉及istio 平台的搭建和开发，本篇文章记录下整体的搭建流程">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/istio-header.png">
+<meta property="og:updated_time" content="2020-01-08T03:11:44.579Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="istio-生产环境搭建">
+<meta name="twitter:description" content="在前一阵的工作中，涉及istio 平台的搭建和开发，本篇文章记录下整体的搭建流程">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/istio-header.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-istio-生产环境搭建" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/istio-header.png" rel="gallery_ck6hnf70f003ss8ulake0vhqe">
+        <img src="/gallery/istio-header.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      istio-生产环境搭建
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/istio-生产环境搭建.html" class="article-date">
+	  <time datetime="2019-11-13T02:40:35.000Z" itemprop="datePublished">November 13, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在前一阵的工作中，涉及istio 平台的搭建和开发，本篇文章记录下整体的搭建流程</p>
+<a id="more"></a>
+
+<h2 id="相关组件"><a href="#相关组件" class="headerlink" title="相关组件"></a>相关组件</h2><p>整个 istio 环境需要以下组件</p>
+<ul>
+<li>prometheus – 用于 K8s 平台和 istio 平台监控</li>
+<li>jaeger – 用于服务间的链路追踪</li>
+<li>elasticsearch – 用于存储链路追踪的数据，（也可增加部署 fluntd 和 kibana 收集监控 K8s 平台日志）</li>
+<li>istio – 平台本体</li>
+</ul>
+<p>由于需要用于生产环境中，istio 部署包中所集成的 Prometheus 和 jaeger 均无法满足需求，其中平台中其他服务需要复用 Prometheus；istio 中集成的 jaeger 为 allinone 模式（用于测试），无法满足生产需求，因此单独拆出来。</p>
+<h2 id="Prometheus-搭建"><a href="#Prometheus-搭建" class="headerlink" title="Prometheus 搭建"></a>Prometheus 搭建</h2><p>Prometheus是由SoundCloud开发的开源监控报警系统和时序列数据库(TSDB)。Prometheus使用Go语言开发，是Google BorgMon监控系统的开源版本。</p>
+<p>2016年由Google发起Linux基金会旗下的原生云基金会(Cloud Native Computing Foundation), 将Prometheus纳入其下第二大开源项目，且在开源社区相当活跃。</p>
+<p>Prometheus和Heapster(Heapster是K8S的一个子项目，用于获取集群的性能数据。)相比功能更完善、更全面。Prometheus性能也足够支撑上万台规模的集群。</p>
+<p>其基本原理是通过HTTP协议周期性抓取被监控组件的状态，任意组件只要提供对应的HTTP接口就可以接入监控。不需要任何SDK或者其他的集成过程。这样做非常适合做虚拟化环境监控系统，比如VM、Docker、Kubernetes等。输出被监控组件信息的HTTP接口被叫做exporter 。目前互联网公司常用的组件大部分都有exporter可以直接使用，比如Varnish、Haproxy、Nginx、MySQL、Linux系统信息(包括磁盘、内存、CPU、网络等等</p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p>Prometheus 此处采用的是 coreos 提供的 <a href="https://github.com/coreos/kube-prometheus" target="_blank" rel="noopener">kube-prometheus</a>，其定义了一组 CRD，且提供了 Operator 便于部署。</p>
+<p>当<code>git clone</code> 下来项目后，就可以无脑部署了：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署 Prometheus 所需的 crd 和 namespace（monitoring）</span></span><br><span class="line">kubectl create -f manifests/setup</span><br><span class="line"><span class="comment"># 检查 crd serverMonitor 是否可用</span></span><br><span class="line">until kubectl get servicemonitors --all-namespaces ; <span class="keyword">do</span> date; sleep 1; <span class="built_in">echo</span> <span class="string">""</span>; <span class="keyword">done</span></span><br><span class="line"><span class="comment"># 部署其他组件</span></span><br><span class="line">kubectl create -f manifests/</span><br></pre></td></tr></table></figure>
+
+<p>在 kube-prometheus 中，主要定义了 以下几个 crd：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 常用</span><br><span class="line">prometheusrules.monitoring.coreos.com -- 用于定义告警规则</span><br><span class="line">servicemonitors.monitoring.coreos.com -- 用于定义 metrics 获取的 api</span><br><span class="line"># 不常用</span><br><span class="line">alertmanagers.monitoring.coreos.com -- 用于 告警配置</span><br><span class="line">podmonitors.monitoring.coreos.com   -- 用于 pod 监控配置</span><br><span class="line">prometheuses.monitoring.coreos.com  -- 用于创建相关 adapter</span><br></pre></td></tr></table></figure>
+
+<p>部署成功后，在 monitoring namespace 下会生成如下 pod 以及 service</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pod</span></span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">alertmanager-main-0                    2/2     Running   2          4d17h</span><br><span class="line">alertmanager-main-1                    2/2     Running   0          4d17h</span><br><span class="line">alertmanager-main-2                    2/2     Running   0          4d17h</span><br><span class="line">grafana-5db74b88f4-sfwl5               1/1     Running   0          4d17h</span><br><span class="line">kube-state-metrics-54f98c4687-8x7b7    3/3     Running   0          4d17h</span><br><span class="line">node-exporter-5p8b8                    2/2     Running   0          4d17h</span><br><span class="line">node-exporter-65r4g                    2/2     Running   0          4d17h</span><br><span class="line">node-exporter-946rm                    2/2     Running   0          4d17h</span><br><span class="line">node-exporter-95x66                    2/2     Running   4          4d17h</span><br><span class="line">node-exporter-lzgv7                    2/2     Running   0          4d17h</span><br><span class="line">prometheus-adapter-8667948d79-hdk62    1/1     Running   0          4d17h</span><br><span class="line">prometheus-k8s-0                       3/3     Running   1          4d17h</span><br><span class="line">prometheus-k8s-1                       3/3     Running   1          4d17h</span><br><span class="line">prometheus-operator-548c6dc45c-ltmv8   1/1     Running   2          4d17h</span><br></pre></td></tr></table></figure>
+
+<p>其中 pod/prometheus-k8s-0 即周期性调取 k8s 平台的 api 获取 metrics 信息。通过<code>kubectl get -n monitoring servicemonitors.monitoring.coreos.com</code>获取 serviceMonitor :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">NAME                      AGE</span><br><span class="line">alertmanager              4d17h</span><br><span class="line">grafana                   4d17h</span><br><span class="line">coredns                   4d17h |</span><br><span class="line">kube-apiserver            4d17h |</span><br><span class="line">kube-controller-manager   4d17h |</span><br><span class="line">kube-scheduler            4d17h | --&gt; 对 k8s 相关组件的监控配置</span><br><span class="line">kube-state-metrics        4d17h |</span><br><span class="line">kubelet                   4d17h |</span><br><span class="line">node-exporter             4d17h   |</span><br><span class="line">prometheus                4d17h   | --&gt; 对Prometheus 自身组件的监控配置</span><br><span class="line">prometheus-operator       4d17h   |</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong>此时我们还没有加入对 isito 组件的监控配置</p>
+<h2 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><p>es 在环境中的角色是存储链路追踪的信息。因为在链路追踪的选型上我们选择了 jaeger，jaeger 所支持的后端存储为 elasticsearch 和 cassandra，相比之下 es 的可复用性更高。</p>
+<p>这里使用的是官方镜像，<code>gcr.io/fluentd-elasticsearch/elasticsearch:v6.6.1</code></p>
+<p>部署成功后，为我们提供了 service <code>elasticsearch-logging</code></p>
+<p>这里推荐一个 chrome 插件，可以很方便的查询 es 集群状态以及数据 <a href="https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm" target="_blank" rel="noopener">ElasticSearch Head</a></p>
+<h2 id="jaeger"><a href="#jaeger" class="headerlink" title="jaeger"></a>jaeger</h2><p>目前 es 已经部署完毕，jaeger 的部署可以参考我之前写过的一篇<a href="/jaeger-istio.html" title="jaeger 在 istio 上的实践">jaeger 在 istio 上的实践</a>，此处不再赘述</p>
+<p>通过部署，我们在 jaeger namespace 下得到以下三个服务：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                        AGE</span><br><span class="line">jaeger-collector   ClusterIP      10.233.15.246   &lt;none&gt;        14267/TCP,14268/TCP,9411/TCP   2d3h</span><br><span class="line">jaeger-query       LoadBalancer   10.233.34.138   &lt;pending&gt;     80:31882/TCP                   2d3h</span><br><span class="line">zipkin             ClusterIP      10.233.53.53    &lt;none&gt;        9411/TCP                       2d3h</span><br></pre></td></tr></table></figure>
+
+<p>其中 zipkin 服务是用于收集使用 zipkin 数据结构的链路信息，jaeger 兼容 zipkin。 jaeger-collector 用于收集 jaeger 使用的数据结构的链路信息；jaeger-query 用于查询。</p>
+<h2 id="istio"><a href="#istio" class="headerlink" title="istio"></a>istio</h2><p>现在所有的准备已经就绪，终于可以部署 istio 了。istio 所使用的版本是 1.3.4。<br>我们选择通过 Helm chart 模板安装部署，首先需要自定义部署参数，修改<code>install/kubernetes/helm/values.yaml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关闭 grafana prometheus tracing 模块，其他模块可根据需求部署安装</span></span><br><span class="line"><span class="attr">grafana:</span></span><br><span class="line"><span class="attr">  enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">prometheus:</span></span><br><span class="line"><span class="attr">  enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">tracing:</span></span><br><span class="line"><span class="attr">  enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 tracing 上报链路信息服务地址</span></span><br><span class="line"><span class="attr">tracer:</span></span><br><span class="line"><span class="attr">  zipkin:</span> </span><br><span class="line"><span class="attr">    address:</span> <span class="string">zipkin.jaeger:9411</span>  <span class="comment"># 格式为servicename.namespace:port</span></span><br></pre></td></tr></table></figure>
+
+<p>执行以下命令进行部署</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加官方helm 仓库</span></span><br><span class="line">helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.3.4/charts/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 部署 istio crd</span></span><br><span class="line">helm install install/kubernetes/helm/istio-init --name istio-init --namespace istio-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查资源 需要等待结果为 23</span></span><br><span class="line">kubectl get crds | grep <span class="string">'istio.io'</span> | wc -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 部署istio，pilot.traceSampling 配置链路追踪的采样率，100表示100%；</span></span><br><span class="line"><span class="comment"># kiali.xxx 配置 kiali 连接外部的 jaeger 和 Prometheus</span></span><br><span class="line"><span class="comment"># istio 重要组件需要多副本部署，例如 galley,policy,pilot,telemetry 等</span></span><br><span class="line">helm install install/kubernetes/helm/istio --name istio --namespace istio-system \</span><br><span class="line">    --<span class="built_in">set</span> pilot.traceSampling=100, \</span><br><span class="line">    kiali.dashboard.jaegerURL=http://jaeger-query.jaeger:80, \</span><br><span class="line">    kiali.prometheusAddr=http://prometheus-k8s.monitoring:9090, \</span><br><span class="line">    galley.replicaCount=3，\</span><br><span class="line">    mixer.policy.replicaCount=3, \</span><br><span class="line">    mixer.telemetry.replicaCount=3, \</span><br><span class="line">    pilot.autoscaleMin=2</span><br></pre></td></tr></table></figure>
+
+<p>至此，istio部署完毕，jaeger 已经接入 istio，但是 Prometheus 仍未配置收集 istio 的 metrics。我们需要创建自己的 serviceMonitor：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.coreos.com/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceMonitor</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">istio-monitor</span>  </span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">prometheus-istio</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span> <span class="comment"># 采集包含以下标签的 pod 的 /metrics </span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">mixer</span> <span class="comment"># 由于 istio 中 业务服务组件的 metrics 均汇总至 mixer 中，因此只采集该组件即可</span></span><br><span class="line"><span class="attr">      istio:</span> <span class="string">mixer</span></span><br><span class="line"><span class="attr">  endpoints:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="string">prometheus</span> <span class="comment"># mixer 组件包含名为 prometheus 的端口，便于采集</span></span><br><span class="line"><span class="attr">    interval:</span> <span class="number">10</span><span class="string">s</span>    <span class="comment"># 采集周期</span></span><br><span class="line"><span class="attr">  namespaceSelector:</span></span><br><span class="line"><span class="attr">    matchNames:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">istio-system</span>   <span class="comment"># 作用域</span></span><br></pre></td></tr></table></figure>
+
+<p>此外，由于 Prometheus 没有权限采集 monitoring 和 kube-system 以外的 endpoint，需要增加 rbac 来增加其权限：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">istio-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">prometheus</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus-istio</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">prometheus</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">nodes</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">services</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">endpoints</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">pods</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">nodes/proxy</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">configmaps</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get"]</span></span><br><span class="line"><span class="attr">- nonResourceURLs:</span> <span class="string">["/metrics"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get"]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus-istio</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">istio-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">prometheus</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus-istio</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">prometheus-k8s</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">monitoring</span></span><br></pre></td></tr></table></figure>
+
+<p>至此，平台搭建完成，可以通过部署 istio 示例程序 bookinfo 进行测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n &lt;your namespace&gt;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/istio/">istio</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/serviceMesh/">serviceMesh</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/环境搭建/">环境搭建</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/Golang学习笔记-Interface.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Golang学习笔记--Interface
+        
+      </div>
+    </a>
+  
+  
+    <a href="/k8s-rbac-认证.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">kubectl的用户认证授权</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#相关组件"><span class="nav-number">1.</span> <span class="nav-text">相关组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Prometheus-搭建"><span class="nav-number">2.</span> <span class="nav-text">Prometheus 搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署"><span class="nav-number">2.1.</span> <span class="nav-text">部署</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#elasticsearch"><span class="nav-number">3.</span> <span class="nav-text">elasticsearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jaeger"><span class="nav-number">4.</span> <span class="nav-text">jaeger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#istio"><span class="nav-number">5.</span> <span class="nav-text">istio</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

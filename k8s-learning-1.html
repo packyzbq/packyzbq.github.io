@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>k8s 学习笔记（一）容器 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="k8sdocker">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="K8s 学习笔记，容器相关知识。">
+<meta name="keywords" content="k8s,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s 学习笔记（一）容器">
+<meta property="og:url" content="http://packyzbq.github.io/k8s-learning-1.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="K8s 学习笔记，容器相关知识。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/k8s-learning-1/graphDriver.png">
+<meta property="og:image" content="http://packyzbq.github.io/k8s-learning-1/docker_rootfs_layer.png">
+<meta property="og:image" content="http://packyzbq.github.io/k8s-learning-1/bind_mount.png">
+<meta property="og:image" content="http://packyzbq.github.io/k8s-learning-1/docker.png">
+<meta property="og:updated_time" content="2020-01-08T07:47:51.828Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="k8s 学习笔记（一）容器">
+<meta name="twitter:description" content="K8s 学习笔记，容器相关知识。">
+<meta name="twitter:image" content="http://packyzbq.github.io/k8s-learning-1/graphDriver.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-k8s-learning-1" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      k8s 学习笔记（一）容器
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/k8s-learning-1.html" class="article-date">
+	  <time datetime="2019-07-05T09:06:59.000Z" itemprop="datePublished">July 5, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>K8s 学习笔记，容器相关知识。</p>
+<a id="more"></a>
+
+<h2 id="容器基础"><a href="#容器基础" class="headerlink" title="容器基础"></a>容器基础</h2><h3 id="容器的实现"><a href="#容器的实现" class="headerlink" title="容器的实现"></a>容器的实现</h3><p>容器是一种沙盒技术，可以通过建立“边界”使不同应用间进行隔离。每一个应用运行在进程之中。<strong>容器技术的核心功能，就是通过约束和修改进程的动态表现，从而为应用创建了一个“边界”</strong>。</p>
+<p>Linux 容器（如 Docker）主要是基于 <strong>Cgroups</strong> 技术创造约束， 使用 <strong>Namespace</strong> 修改进程视图。</p>
+<h4 id="1-Namespace"><a href="#1-Namespace" class="headerlink" title="1. Namespace"></a>1. Namespace</h4><p>Namespace 技术实际上修改了应用进程看待整个计算机 “视图”，即它的“视线” 被操作系统做了限制，只能 “看到” 某些指定的内容。</p>
+<p>以docker 为例，其主要使用的资源隔离是：</p>
+<ol>
+<li>mount - 保证容器文件系统的视图      </li>
+<li>uts - 用于隔离宿主机的 hostname domainName</li>
+<li>pid - 用于隔离宿主机的进程号，保证容器中 init 进程以1号进程启动</li>
+<li>network - 用于隔离与宿主机的网络，<code>--network=host</code>参数使用主机网络</li>
+<li>user - 控制用户uid 在宿主机上的映射</li>
+<li>ipc - 控制进程间通信（信号量等）</li>
+<li>cgroup - runc 实现，但是未使用</li>
+</ol>
+<p>以 PID Namespace 为例，当我们用指令启动一个 docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it busybox /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>查看其内部的进程<code>ps -ef</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PID  USER   TIME COMMAND</span><br><span class="line">1    root   0:00 /bin/sh</span><br><span class="line">10   root   0:00 ps</span><br></pre></td></tr></table></figure>
+
+<p>在容器中，/bin/sh 的进程号是 1， 也就是说在当前的进程空间 PID=1， 但是在系统层面其真实的 PID 可能是 100 或其他。</p>
+<p>这时，这些进程就会觉得自己是各自 PID Namespace 里的第 1 号进程，只能看到各自 Mount Namespace 里挂载的目录和文件，只能访问到各自 Network Namespace 里的网络设备，就仿佛运行在一个个 “容器” 里面，与世隔绝。</p>
+<p>Namespace 其实只是 Linux 创建新进程的一个可选参数。当我们在 Linux 系统中创建线程的系统调用是 clone()，比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int pid = clone(main_function, stack_size, SIGCHLD, NULL);</span><br></pre></td></tr></table></figure>
+
+<p>返回的 pid 是系统中的 pid，但如果指定<code>CLONE_NEWPID</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL);</span><br></pre></td></tr></table></figure>
+
+<p>新建的进程会进入到一个新的进程空间，其 PID=1</p>
+<p><strong>在linux 中，可以使用 <code>unshare</code> 命令<code>--fork</code> 创建子进程，实现pid的隔离。</strong></p>
+<blockquote>
+<p>Docker vs VM:<br></p>
+<ul>
+<li>VM 通过硬件虚拟化功能，模拟出了运行一个操作系统需要的各种硬件，比如 CPU、内存、I/O 设备等等。然后，它在这些虚拟的硬件上安装了一个新的操作系统，即 Guest OS。<br></li>
+<li>Docker 启动的还是原来的应用进程，只不过在创建这些进程时，Docker 为它们加上了各种各样的 Namespace 参数，形成了隔离。<strong>容器，其实是一种特殊的进程而已。</strong></li>
+</ul>
+</blockquote>
+<p>基于 Linux Namespace 的隔离机制相比于虚拟化技术也有很多不足之处，其中最主要的问题就是：隔离得不彻底。:</p>
+<ul>
+<li>基于系统内核</li>
+<li>很多资源和对象是不能被 Namespace 化的，最典型的例子就是：时间。</li>
+</ul>
+<h4 id="2-Cgroup"><a href="#2-Cgroup" class="headerlink" title="2. Cgroup"></a>2. Cgroup</h4><p>Control groups ,Linux内核提供的一种可以限制、记录、隔离进程组（process groups）所使用的物理资源（如：cpu,memory,IO等等）的机制，Cgroups 还能够对进程进行优先级设置、审计，以及将进程挂起和恢复等操作。</p>
+<p>Cgroups 给用户暴露出来的操作接口是文件系统，即它以文件和目录的方式组织在操作系统的 /sys/fs/cgroup 路径下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ mount -t cgroup </span><br><span class="line"></span><br><span class="line"># 用于为进程分配单独的 CPU 核和对应的内存节点；</span><br><span class="line">cpuset on /sys/fs/cgroup/cpuset type cgroup (rw,nosuid,nodev,noexec,relatime,cpuset)</span><br><span class="line"># 为进程限制 cpu 使用率相关</span><br><span class="line">cpu on /sys/fs/cgroup/cpu type cgroup (rw,nosuid,nodev,noexec,relatime,cpu)</span><br><span class="line"># 统计进程组使用 cpu 资源</span><br><span class="line">cpuacct on /sys/fs/cgroup/cpuacct type cgroup (rw,nosuid,nodev,noexec,relatime,cpuacct)</span><br><span class="line"># 为​​​块​​​设​​​备​​​设​​​定​​​I/O 限​​​制，一般用于磁盘等设备；</span><br><span class="line">blkio on /sys/fs/cgroup/blkio type cgroup (rw,nosuid,nodev,noexec,relatime,blkio)</span><br><span class="line"># 为进程设定内存使用的限制。</span><br><span class="line">memory on /sys/fs/cgroup/memory type cgroup (rw,nosuid,nodev,noexec,relatime,memory)</span><br></pre></td></tr></table></figure>
+
+<p>其中 cpuset cpu memory 子目录作为 Cgroups 可以限制的子系统， 具体的限制策略在每个子目录下。例如 cpu 子系统下有文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ ls /sys/fs/cgroup/cpu</span><br><span class="line"></span><br><span class="line">cgroup.clone_children </span><br><span class="line">cpu.cfs_period_us </span><br><span class="line">cpu.rt_period_us  </span><br><span class="line">cpu.shares </span><br><span class="line">notify_on_release</span><br><span class="line">cgroup.procs      </span><br><span class="line">cpu.cfs_quota_us  </span><br><span class="line">cpu.rt_runtime_us </span><br><span class="line">cpu.stat  </span><br><span class="line">tasks</span><br></pre></td></tr></table></figure>
+
+<p>当我们想限制 cpu 资源时，所需的步骤如下：</p>
+<ol>
+<li>在 <code>/sys/fs/cgroup/cpu</code> 下创建目录 <code>container</code>(控制组)<br> 在<code>container</code>目录下，会自动生成该子系统对应的资源限制文件</li>
+<li>配置限制文件</li>
+<li>被限制的进程的 PID 写入 container 组里的 tasks 文件（实现限制进程的资源）</li>
+</ol>
+<h5 id="docker-中的-cgroup"><a href="#docker-中的-cgroup" class="headerlink" title="docker 中的 cgroup"></a>docker 中的 cgroup</h5><p>对于 Docker 等 Linux 容器项目来说，它们只需要在每个子系统下面，为每个容器创建一个控制组（即创建一个新目录），然后在启动容器进程之后，把这个进程的 PID 填写到对应控制组的 tasks 文件。</p>
+<p>在 docker 中，有两种驱动实现cgroup：</p>
+<ul>
+<li>cgroupfs<br>这种方式的原理如同上文所述，将pid 写入 cgroup 文件，资源限制写入对应的 mem cpu cgroup 文件</li>
+<li>systemd<br>这种方式提供了一种 cgroup 管理方式，它不允许手动更改 cgroup 文件，相反 systemd 提供了一系列更改 cgroup 文件的接口，且与底层系统耦合。</li>
+</ul>
+<p>docker 中常常用到的 cgroup 资源限制主要是：</p>
+<ol>
+<li>cpu cpuset cpuacct – cpu利用率、cpu使用核数等</li>
+<li>memory – 内存使用限制</li>
+<li>device – 用于安全，可以控制容器中可以看到的设备</li>
+<li>freezer – 用于安全，在停止容器时，冻结进程，防止进程 fork 出子进程并逃逸到宿主机。</li>
+<li>blkio – 限制容器用到的磁盘的io速率限制 cgroup v1只能限制同步io(block io)，无法限制 buffer io</li>
+<li>pid – 容器中最大的进程数量</li>
+</ol>
+<p>不常用：</p>
+<ol>
+<li>net_cls</li>
+<li>net_prio</li>
+<li>hugetlb</li>
+<li>perf_event</li>
+<li>rdma</li>
+</ol>
+<blockquote>
+<p>上述资源限制中，runc不支持 rdma</p>
+</blockquote>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>容器是一个 “单进程” 模型， 用户应用进程实际上是 Docker 中 PID=1 的进程。 也就是说在一个容器中，<strong>没办法同时运行两个不同的应用</strong>，除非你能事先找到一个公共的 PID=1 的程序来充当两个不同应用的父进程。</p>
+<p>容器与应用<strong>同生命周期</strong></p>
+<p>此外还存在一些问题，在容器中的 /proc 文件系统不了解 Cgroups 限制的存在， 即在容器中使用 <code>top</code> 时会显示宿主机的 CPU 和内存数据。</p>
+<p>解决这个问题需要借助 <code>lxcfs</code>, 做法是把宿主机的 /var/lib/lxcfs/proc/memoinfo 文件挂载到Docker容器的/proc/meminfo位置,容器中进程读取相应文件内容时，LXCFS的FUSE实现会从容器对应的Cgroup中读取正确的内存限制，从而使得应用获得正确的资源约束设定。<a href="https://yq.aliyun.com/articles/566208" target="_blank" rel="noopener">详细内容</a></p>
+<h2 id="容器镜像"><a href="#容器镜像" class="headerlink" title="容器镜像"></a>容器镜像</h2><h3 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h3><p>容器使用 Mount Namespace 隔离容器看到的文件系统与宿主机的文件系统，但是在创建进程时，即使开启了 Mount Namespace，容器进程看到的文件系统也跟宿主机完全一样。</p>
+<blockquote>
+<p>Mount Namespace 修改的，是容器进程对文件系统 “挂载点” 的认知。</p>
+</blockquote>
+<p>只有在 “挂载” 这个操作发生之后，进程的视图才会被改变,而在此之前，新创建的容器会直接继承宿主机的各个挂载点。重新挂载的目录只在 Mount Namespace 中才会生效。</p>
+<p>在 Linux 系统中，可以使用 <code>chroot</code> 来更改 <code>/bin/bash</code> 进程的根目录，Mount Namespace 则是基于对chroot 不断改良发明而来。</p>
+<blockquote>
+<p>chroot 更换根目录过程：<br></p>
+<ol>
+<li>新建一个目录 $HOME/test</li>
+<li>将 bash 命令拷贝到 $HOME/test/bin 下</li>
+<li>将 bash 所需的 .so 文件拷贝到 $HOME/test/lib 下</li>
+<li>chroot $HOME/test /bin/bash （告诉操作系统将 $HOME/test 目录作为 /bin/bash 进程的根目录）</li>
+</ol>
+</blockquote>
+<p>在容器的根目录，则是挂载<strong>一个完整操作系统的文件系统</strong>，用来为容器进程提供隔离后执行环境的文件系统，这个文件系统称为 <strong>rootfs</strong></p>
+<p>对 Docker 项目来说，它最核心的原理实际上就是为待创建的用户进程：</p>
+<ol>
+<li>启用 Linux Namespace 配置；</li>
+<li>设置指定的 Cgroups 参数；</li>
+<li>切换进程的根目录（Change Root）</li>
+</ol>
+<h3 id="容器镜像结构"><a href="#容器镜像结构" class="headerlink" title="容器镜像结构"></a>容器镜像结构</h3><p>由于 rootfs 的存在，应用的云端环境和本地环境完全一致：因为对一个应用来说，操作系统本身才是它运行所需要的最完整的 “依赖库”，rootfs 里打包的不只是应用，而是整个操作系统的文件和目录，也就意味着，应用以及它运行所需要的所有依赖，都被封装在了一起。</p>
+<p>但现在有一个问题：每开发一个应用，或者升级一下现有的应用，都要重复制作一次 rootfs 吗？</p>
+<blockquote>
+<p>Docker 在镜像的设计中，引入了层（layer）的概念。也就是说，用户制作镜像的每一步操作，都会生成一个层，也就是一个增量 rootfs。</p>
+</blockquote>
+<p>layer 的设计使用了联合文件系统（Union File System），其最主要的功能是将多个不同位置的目录联合挂载（union mount）到同一个目录下。</p>
+<p>例如：/A 下有 a，x 两个文件， /B 下有 b，x两个文件，当把 /A /B 都挂载到 /C 的目录下，/C 下则有 a，b，x 三个文件。</p>
+<p>在 Docker 中使用 AuFS（Alternative UnionFS），是对 Linux 原生的 UnionFS 的重写和改进。对于 AuFS 来说，它最关键的目录结构在 /var/lib/docker 路径下的 diff 目录：<code>/var/lib/docker/aufs/diff/&lt;layer_id&gt;</code></p>
+<p>例如 Ubuntu 的镜像：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ docker image inspect ubuntu:latest</span><br><span class="line">     &quot;RootFS&quot;: &#123;</span><br><span class="line">      &quot;Type&quot;: &quot;layers&quot;,</span><br><span class="line">      &quot;Layers&quot;: [        // 有5层， 每层都是 rootfs 的增量，Ubuntu 操作系统文件与目录的一部分</span><br><span class="line">        &quot;sha256:f49017d4d5ce9c0f544c...&quot;,</span><br><span class="line">        &quot;sha256:8f2b771487e9d6354080...&quot;,</span><br><span class="line">        &quot;sha256:ccd4d61916aaa2159429...&quot;,</span><br><span class="line">        &quot;sha256:c01d74f99de40e097c73...&quot;,</span><br><span class="line">        &quot;sha256:268a067217b5fe78e000...&quot;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在使用镜像时，Docker 会把这些增量联合挂载在一个统一的挂载点上: <code>/var/lib/docker/aufs/mnt/</code></p>
+<p>下面解析一下这5个镜像层如何被联合挂载成一个完整的 Ubuntu 文件系统的。</p>
+<ol>
+<li><p>镜像层挂载的信息保存在 <code>/sys/fs/aufs</code> 中，通过查看 AuFS 的挂载信息，可以找到这个目录对应的 AuFS 的内部ID：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat /proc/mounts| grep aufs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用这个 ID，你就可以在 /sys/fs/aufs 下查看被联合挂载在一起的各个层的信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ cat /sys/fs/aufs/si_972c6d361e6b32ba/br[0-9]*</span><br><span class="line"></span><br><span class="line">/var/lib/docker/aufs/diff/6e3be5d2ecccae7cc...=rw</span><br><span class="line">/var/lib/docker/aufs/diff/6e3be5d2ecccae7cc...-init=ro+wh</span><br><span class="line">/var/lib/docker/aufs/diff/32e8e20064858c0f2...=ro+wh</span><br><span class="line">/var/lib/docker/aufs/diff/2b8858809bce62e62...=ro+wh</span><br><span class="line">/var/lib/docker/aufs/diff/20707dce8efc0d267...=ro+wh</span><br><span class="line">/var/lib/docker/aufs/diff/72b0744e06247c7d0...=ro+wh</span><br><span class="line">/var/lib/docker/aufs/diff/a524a729adadedb90...=ro+wh</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<blockquote>
+<p>ps: 若系统中没有配置 Aufs， 则默认使用 graphDriver 机制，挂载目录。<br><br>镜像中的 GraphDriver 字段下显示了挂载的根目录：<br></p>
+<img src="/k8s-learning-1/graphDriver.png">
+</blockquote>
+<p>因此这个容器的 rootfs 组成结构如下图</p>
+<!-- ![rootfs_layer](k8s-learning-1/docker_rootfs_layer.png) -->
+<img src="/k8s-learning-1/docker_rootfs_layer.png">
+
+<h4 id="只读层"><a href="#只读层" class="headerlink" title="只读层"></a>只读层</h4><h4 id="可读写层"><a href="#可读写层" class="headerlink" title="可读写层"></a>可读写层</h4><p>它是这个容器的 rootfs 最上面的一层，一旦在容器里做了写操作，你修改产生的内容就会以增量的方式出现在这个层中。</p>
+<p>若是删除一个只读层文件，AuFS 会在可读写层创建一个 whiteout 文件，把只读层里的文件 “遮挡” 起来。</p>
+<p>最上面这个可读写层的作用，就是专门用来存放你修改 rootfs 后产生的增量，无论是增、删、改，都发生在这里。而当我们使用完了这个被修改过的容器之后，还可以使用 docker commit 和 push 指令，保存这个被修改过的可读写层，并上传到 Docker Hub 上，供其他人使用；而与此同时，原先的只读层里的内容则不会有任何变化。</p>
+<h4 id="Init-层"><a href="#Init-层" class="headerlink" title="Init 层"></a>Init 层</h4><p>以 “-init” 结尾的层，夹在只读层和读写层之间。Init 层是 Docker 项目单独生成的一个内部层，专门用来存放 /etc/hosts、/etc/resolv.conf 等信息。</p>
+<p>需要这样一层的原因是，这些文件本来属于只读的 Ubuntu 镜像的一部分，但是用户往往需要在<strong>启动容器时写入一些指定的值</strong>比如 hostname，所以就需要在可读写层对它们进行修改。</p>
+<p>可是，这些修改往往只对当前的容器有效，我们并不希望执行 docker commit 时，把这些信息连同可读写层一起提交掉。</p>
+<p>所以，Docker 做法是，在修改了这些文件之后，以一个单独的层挂载了出来。而用户执行 docker commit 只会提交可读写层，所以是不包含这些内容的。</p>
+<h2 id="容器实践"><a href="#容器实践" class="headerlink" title="容器实践"></a>容器实践</h2><p>用 Docker 部署一个用 Python 编写的 Web 应用，解析整个步骤过程。</p>
+<h3 id="1-制作容器镜像"><a href="#1-制作容器镜像" class="headerlink" title="1. 制作容器镜像"></a>1. 制作容器镜像</h3><p>Dockerfile:</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用官方提供的 Python 开发镜像作为基础镜像</span></span><br><span class="line"><span class="keyword">FROM</span> python:<span class="number">2.7</span>-slim</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 将工作目录切换为 /app</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /app</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 将当前目录下的所有内容复制到 /app 下</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> . /app</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 使用 pip 命令安装这个应用所需要的依赖</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> pip install --trusted-host pypi.python.org -r requirements.txt</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 允许外界访问容器的 80 端口</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 设置环境变量</span></span><br><span class="line"><span class="keyword">ENV</span> NAME World</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 设置容器进程为：python app.py，即：这个 Python 应用的启动命令</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"python"</span>, <span class="string">"app.py"</span>]</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Dockerfile 的设计思想，是使用一些标准的原语（即大写高亮的词语），描述我们所要构建的 Docker 镜像。并且这些原语，都是按顺序处理的。<br>在 dockerfile 中的<code>CMD</code> 其实是作为 <code>ENTRYPOINT</code> 的参数存在，<code>ENTRYPOINT</code> 不指定时默认为 <code>/bin/sh -c</code>。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker build -t helloworld .</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>-t 加标签命名</li>
+<li>. 表示加载当前目录下的 dockerfile<br>docker build 会自动加载当前目录下的 Dockerfile 文件，然后按照顺序，执行文件中的原语。而这个过程，实际上可以等同于 Docker 使用基础镜像启动了一个容器，然后在容器中依次执行 Dockerfile 中的原语。</li>
+</ul>
+<blockquote>
+<p>需要注意的是，Dockerfile 中的每个原语执行后，都会生成一个对应的镜像层</p>
+</blockquote>
+<h3 id="2-启动容器"><a href="#2-启动容器" class="headerlink" title="2.启动容器"></a>2.启动容器</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动容器</span></span><br><span class="line">docker run -p 4000:80 helloworld</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>命名镜像<br><code>docker tag helloworld geektime/helloworld:v1</code></li>
+<li>推镜像<br><code>docker push geektime/helloworld:v1</code></li>
+<li>修改文件内容后，提交镜像<br><code>docker commit 4ddf4638572d geektime/helloworld:v2</code><br>docker commit，实际上就是在容器运行起来后，把最上层的“可读写层”，加上原先容器镜像的只读层，打包组成了一个新的镜像。由于使用了联合文件系统，你在容器里对镜像 rootfs 所做的任何修改，都会被操作系统先复制到这个可读写层，然后再修改。这就是所谓的：Copy-on-Write。</li>
+</ol>
+<h4 id="docker-exec-如何进入容器"><a href="#docker-exec-如何进入容器" class="headerlink" title="docker exec 如何进入容器"></a>docker exec 如何进入容器</h4><p>一个进程的每种 Linux Namespace，都在它对应的 /proc/[进程号]/ns 下有一个对应的虚拟文件，并且链接到一个真实的 Namespace 文件上。</p>
+<p>容器的具体实现是使用 <code>int setns(int fd, int nstype)</code> 系统调用，fd 参数指明了关联的namespace,其指向了\proc\PID\ns目录系一个符号连接的文件描述符。</p>
+<h3 id="3-容器数据卷"><a href="#3-容器数据卷" class="headerlink" title="3.容器数据卷"></a>3.容器数据卷</h3><p>在容器中，使用了 rootfs 和 Mount Namespace 技术创建了完全隔离的文件系统环境，但是有这样两个问题：</p>
+<ul>
+<li>容器里进程新建的文件，怎么才能让宿主机获取到？</li>
+<li>宿主机上的文件和目录，怎么才能让容器里的进程访问到？</li>
+</ul>
+<p>首先，Volume 声明有以下两种方式</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker 临时创建 /var/lib/docker/volumes/[VOLUME_ID]/_data，并挂载到容器的 /test中</span></span><br><span class="line">$ docker run -v /<span class="built_in">test</span> ...</span><br><span class="line"><span class="comment"># 宿主机 /home 挂载到容器的 /test中</span></span><br><span class="line">$ docker run -v /home:/<span class="built_in">test</span> ...</span><br></pre></td></tr></table></figure>
+
+<p>针对第二个问题，可以回顾一下 mount namespace机制，在执行 chroot(或者 pivot_root)之前，容器进程始终可以看到宿主机上整个文件系统；同时，而宿主机上的文件系统，也自然包括了我们要使用的容器镜像。</p>
+<p>所以，我们只需要在 rootfs 准备好之后，在执行 chroot 之前，把 Volume 指定的宿主机目录（比如 /home 目录），挂载到指定的容器目录（比如 /test 目录）在宿主机上对应的目录（即 /var/lib/docker/aufs/mnt/[可读写层 ID]/test）上，这个 Volume 的挂载工作就完成了。</p>
+<p>更重要的是，由于执行这个挂载操作时，“容器进程”已经创建了，也就意味着此时 Mount Namespace 已经开启了。所以，这个挂载事件只在这个容器里可见。你在宿主机上，是看不见容器内部的这个挂载点的。<strong>这就保证了容器的隔离性不会被 Volume 打破。</strong></p>
+<blockquote>
+<p>注意：这里提到的 “ 容器进程 “，是 Docker 创建的一个容器初始化进程 (dockerinit)，而不是应用进程 (ENTRYPOINT + CMD)。dockerinit 会负责完成根目录的准备、挂载设备和目录、配置 hostname 等一系列需要在容器内进行的初始化操作。最后，它通过 execv() 系统调用，让应用进程取代自己，成为容器里的 PID=1 的进程。</p>
+</blockquote>
+<h4 id="linux-的绑定挂载"><a href="#linux-的绑定挂载" class="headerlink" title="linux 的绑定挂载"></a>linux 的绑定挂载</h4><!-- ![bind_mount](k8s-learning-1/bind_mount.png) -->
+<img src="/k8s-learning-1/bind_mount.png">
+<p>正如上图所示，mount –bind /home /test，会将 /home 挂载到 /test 上。其实相当于将 /test 的 dentry，重定向到了 /home 的 inode。这样当我们修改 /test 目录时，实际修改的是 /home 目录的 inode。这也就是为何，一旦执行 umount 命令，/test 目录原先的内容就会恢复：因为修改真正发生在的，是 /home 目录里。</p>
+<p>所以，在一个正确的时机，进行一次绑定挂载，Docker 就可以成功地将一个宿主机上的目录或文件，不动声色地挂载到容器中。</p>
+<p>那么，这个 /test 目录里的内容，既然挂载在容器 rootfs 的可读写层，它会不会被 docker commit 提交掉呢？</p>
+<p>容器的镜像操作，比如 docker commit，都是发生在宿主机空间的。而由于 Mount Namespace 的隔离作用，宿主机并不知道这个绑定挂载的存在。所以，在宿主机看来，容器中可读写层的 /test 目录（/var/lib/docker/aufs/mnt/[可读写层 ID]/test），始终是空的。</p>
+<h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><!-- ![img](k8s-learning-1/docker.png) -->
+<img src="/k8s-learning-1/docker.png">
+<p>这个容器进程“python app.py”，运行在由 Linux Namespace 和 Cgroups 构成的隔离环境里；而它运行所需要的各种文件，比如 python，app.py，以及整个操作系统文件，则由多个联合挂载在一起的 rootfs 层提供。</p>
+<p>这些 rootfs 层的最下层，是来自 Docker 镜像的只读层。</p>
+<p>在只读层之上，是 Docker 自己添加的 Init 层，用来存放被临时修改过的 /etc/hosts 等文件。</p>
+<p>而 rootfs 的最上层是一个可读写层，它以 Copy-on-Write 的方式存放任何对只读层的修改，容器声明的 Volume 的挂载点，也出现在这一层。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/">k8s</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/effectiv-java-note-1.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Effective Java 3rd 读书笔记（一）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/omnibus-gitlab-for-mips64el-编译记录.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">omnibus-gitlab-for-mips64el-编译记录</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#容器基础"><span class="nav-number">1.</span> <span class="nav-text">容器基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#容器的实现"><span class="nav-number">1.1.</span> <span class="nav-text">容器的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Namespace"><span class="nav-number">1.1.1.</span> <span class="nav-text">1. Namespace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Cgroup"><span class="nav-number">1.1.2.</span> <span class="nav-text">2. Cgroup</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#docker-中的-cgroup"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">docker 中的 cgroup</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">1.1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器镜像"><span class="nav-number">2.</span> <span class="nav-text">容器镜像</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文件系统"><span class="nav-number">2.1.</span> <span class="nav-text">文件系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器镜像结构"><span class="nav-number">2.2.</span> <span class="nav-text">容器镜像结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#只读层"><span class="nav-number">2.2.1.</span> <span class="nav-text">只读层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可读写层"><span class="nav-number">2.2.2.</span> <span class="nav-text">可读写层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Init-层"><span class="nav-number">2.2.3.</span> <span class="nav-text">Init 层</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器实践"><span class="nav-number">3.</span> <span class="nav-text">容器实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-制作容器镜像"><span class="nav-number">3.1.</span> <span class="nav-text">1. 制作容器镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启动容器"><span class="nav-number">3.2.</span> <span class="nav-text">2.启动容器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#docker-exec-如何进入容器"><span class="nav-number">3.2.1.</span> <span class="nav-text">docker exec 如何进入容器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-容器数据卷"><span class="nav-number">3.3.</span> <span class="nav-text">3.容器数据卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#linux-的绑定挂载"><span class="nav-number">3.3.1.</span> <span class="nav-text">linux 的绑定挂载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

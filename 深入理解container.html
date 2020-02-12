@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>深入理解container--容器运行时 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="container,docker,linux">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="我们都知道，容器技术其实在很久以前就已经出现，但只是在最近十年由于云计算的发展才逐渐进入大众的视野。对于容器运行时，传统意义上来说就是代表容器从拉取镜像到启动运行再到中止的整个生命周期，较类似于 Java 中的 Java hotspot 运行时。在本文中我会介绍容器运行时相关概念及组件原理，梳理下我们常听到的 OCI、runc、containerd 等名词之间的关系。">
+<meta name="keywords" content="container,docker,linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解container--容器运行时">
+<meta property="og:url" content="http://packyzbq.github.io/深入理解container.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="我们都知道，容器技术其实在很久以前就已经出现，但只是在最近十年由于云计算的发展才逐渐进入大众的视野。对于容器运行时，传统意义上来说就是代表容器从拉取镜像到启动运行再到中止的整个生命周期，较类似于 Java 中的 Java hotspot 运行时。在本文中我会介绍容器运行时相关概念及组件原理，梳理下我们常听到的 OCI、runc、containerd 等名词之间的关系。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/docker.png">
+<meta property="og:updated_time" content="2020-01-10T09:47:48.748Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解container--容器运行时">
+<meta name="twitter:description" content="我们都知道，容器技术其实在很久以前就已经出现，但只是在最近十年由于云计算的发展才逐渐进入大众的视野。对于容器运行时，传统意义上来说就是代表容器从拉取镜像到启动运行再到中止的整个生命周期，较类似于 Java 中的 Java hotspot 运行时。在本文中我会介绍容器运行时相关概念及组件原理，梳理下我们常听到的 OCI、runc、containerd 等名词之间的关系。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/docker.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-深入理解container" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/docker.png" rel="gallery_ck6hnf6yx0026s8ulukabeout">
+        <img src="/gallery/docker.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      深入理解container--容器运行时
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/深入理解container.html" class="article-date">
+	  <time datetime="2020-01-07T09:06:22.000Z" itemprop="datePublished">January 7, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我们都知道，容器技术其实在很久以前就已经出现，但只是在最近十年由于云计算的发展才逐渐进入大众的视野。对于容器运行时，传统意义上来说就是代表容器从拉取镜像到启动运行再到中止的整个生命周期，较类似于 Java 中的 Java hotspot 运行时。在本文中我会介绍容器运行时相关概念及组件原理，梳理下我们常听到的 OCI、runc、containerd 等名词之间的关系。</p>
+<a id="more"></a>
+
+<h2 id="何为容器运行时"><a href="#何为容器运行时" class="headerlink" title="何为容器运行时"></a>何为容器运行时</h2><p>容器运行时顾名思义就是要掌控容器运行的整个生命周期，以 docker 为例，其作为一个整体的系统，主要提供的功能如下：</p>
+<ul>
+<li>制定容器镜像格式</li>
+<li>构建容器镜像 <code>docker build</code></li>
+<li>管理容器镜像 <code>docker images</code></li>
+<li>管理容器实例 <code>docker ps</code></li>
+<li>运行容器 <code>docker run</code></li>
+<li>实现容器镜像共享 <code>docker pull/push</code></li>
+</ul>
+<p>然而这些功能均可由小的组件单独实现，且没有相互依赖。而后 Docker 公司与 CoreOS 和 Google 共同创建了 OCI (Open Container Initial)，并提供了两种规范：</p>
+<ul>
+<li>运行时规范(<a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">https://github.com/opencontainers/runtime-spec</a>)<br>描述如何运行<code>filesystem bundle</code></li>
+<li>镜像规范(<a href="https://github.com/opencontainers/image-spec" target="_blank" rel="noopener">https://github.com/opencontainers/image-spec</a>)<br>制定镜像格式、操作等</li>
+</ul>
+<blockquote>
+<p>filesystem bundle(文件系统束): 定义了一种将容器编码为文件系统束的格式，即以某种方式组织的一组文件，并包含所有符合要求的运行时对其执行所有标准操作的必要数据和元数据，即config.json 与 根文件系统。</p>
+</blockquote>
+<p>而后，Docker、Google等开源了用于运行容器的工具和库 runc，作为 OCI 的一种实现参考。在此之后，各种运行时工具和库也慢慢出现，例如 rkt、containerd、cri-o 等，然而这些工具所拥有的功能却不尽相同，有的只有运行容器(runc、lxc)，而有的除此之外也可以对镜像进行管理(containerd、cri-o)。目前较为流行的说法是将容器运行时分成了 low-level 和 high-level 两类。</p>
+<p>low-level: 指的是仅关注运行容器的容器运行时，调用操作系统，使用 namespace 和 cgroup 实现资源隔离和限制。<br>high-level: 指包含了更多上层功能，例如 grpc调用，镜像存储管理等。</p>
+<p>不同工具的关系如下图：</p>
+<img src="/深入理解container/runtimes.png">
+
+
+<h2 id="low-level-runtime"><a href="#low-level-runtime" class="headerlink" title="low-level runtime"></a>low-level runtime</h2><p>low-level runtime 关注如何与操作系统交互，创建并运行容器。目前常见的 low-level runtime有：</p>
+<ul>
+<li>lmctfy – 是Google的一个项目，它是Borg使用的容器运行时</li>
+<li>runc – 目前使用最广泛的容器运行时。它最初是作为Docker的一部分开发的，后来被提取出来作为一个单独的工具和库。其实现了 OCI 规范，包含config.json文件和容器的根文件系统。</li>
+<li>rkt – CoreOS开发的Docker/runc的一个流行替代方案，提供了其他 low-level runtimes (如runc)所提供的所有特性。</li>
+</ul>
+<p>容器在 linux 中使用 namesapce 实现资源隔离，使用 cgroup 实现资源限制，这部分在<a href="/k8s-learning-1.html" title="k8s基础--容器篇">k8s基础--容器篇</a>中对原理详细介绍，此处不做赘述。这里我们详细介绍下如何创建一个简单的 runtime。</p>
+<p>我们以 busybox 镜像作为运行时的一个根文件系统，首先创建一个临时目录并将 busybox 中的所有文件解压缩到目录中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CID=$(docker create busybox)</span><br><span class="line">ROOTFS=$(mktemp -d)</span><br><span class="line">docker <span class="built_in">export</span> <span class="variable">$CID</span> | tar -xf - -C <span class="variable">$ROOTFS</span></span><br></pre></td></tr></table></figure>
+
+<p>限制我们需要创建 cgroup 对内存和cpu进行限制</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">UUID=$(uuidgen)</span><br><span class="line">cgcreate -g cpu,memory:<span class="variable">$UUID</span></span><br><span class="line"><span class="comment"># 内存限制设置为 100MB</span></span><br><span class="line">cgset -r memory.limit_in_bytes=100000000 <span class="variable">$UUID</span></span><br><span class="line"><span class="comment"># cpu 限制设置为 512m</span></span><br><span class="line">cgset -r cpu.shares=512 <span class="variable">$UUID</span></span><br></pre></td></tr></table></figure>
+
+<p>上面 <code>cpu.shares</code> 是相对于同时运行的其他进程的CPU。单独运行的容器可以使用整个CPU，但是如果其他容器正在运行，它们会按照比例分配cpu资源。除此以外，还可以对cpu内核数量的使用进行限制：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置检查CPU使用情况的频率，单位是微秒</span></span><br><span class="line">cgset -r cpu.cfs_period_us=1000000 <span class="variable">$UUID</span></span><br><span class="line"><span class="comment"># 设置任务在一个时间段内在一个核心上运行的时间量，单位是微秒</span></span><br><span class="line">cgset -r cpu.cfs_quota_us=2000000 <span class="variable">$UUID</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们使用 <code>unshare</code> 命令在 cgroug 中执行命令，它可以实现 namespace 的隔离。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cgexec -g cpu,memory:<span class="variable">$UUID</span> \</span><br><span class="line">&gt;     unshare -uinpUrf --mount-proc \</span><br><span class="line">&gt;     sh -c <span class="string">"/bin/hostname <span class="variable">$UUID</span> &amp;&amp; chroot <span class="variable">$ROOTFS</span> /bin/sh"</span></span><br><span class="line">/ <span class="built_in">echo</span> <span class="string">"Hello from in a container"</span></span><br><span class="line">Hello from <span class="keyword">in</span> a container</span><br></pre></td></tr></table></figure>
+
+<p>最后，在执行结束后，通过下面的指令清理环境</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cgdelete -r -g cpu,memory:<span class="variable">$UUID</span></span><br><span class="line">rm -r <span class="variable">$ROOTFS</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这一部分的实践，主要参考自文章 <a href="https://www.ianlewis.org/en/container-runtimes-part-2-anatomy-low-level-contai" target="_blank" rel="noopener">https://www.ianlewis.org/en/container-runtimes-part-2-anatomy-low-level-contai</a></p>
+</blockquote>
+<h2 id="high-level-runtime"><a href="#high-level-runtime" class="headerlink" title="high-level runtime"></a>high-level runtime</h2><p>High-level runtimes相较于low-level runtimes位于堆栈的上层。low-level runtimes负责实际运行容器，而High-level runtimes负责传输和管理容器镜像，解压镜像，并传递给low-level runtimes来运行容器。目前主流的 high-level runtime 有：</p>
+<ul>
+<li>docker</li>
+<li>containerd</li>
+<li>rkt</li>
+</ul>
+<p>这里我们以 containerd 为例具体解析整个架构以及工作原理。</p>
+<h3 id="containerd"><a href="#containerd" class="headerlink" title="containerd"></a>containerd</h3><p>containerd 的架构图如图</p>
+
+
+<p>其中，grpc 模块向上层提供服务接口，metrics 则提供监控数据(cgroup 相关数据)，两者均向上层提供服务。containerd 包含一个守护进程，该进程通过本地 UNIX 套接字暴露 grpc 接口。</p>
+<p>storage 部分负责镜像的存储、管理、拉取等<br>metadata 管理容器及镜像的元数据，通过bootio存储在磁盘上<br>task – 管理容器的逻辑结构，与 low-level 交互<br>event – 对容器操作的事件，上层通过订阅可以知道发生了什么事情<br>Runtimes – low-level runtime（对接 runc）</p>
+<p>containerd 主要流程如下：</p>
+<img src="/深入理解container/containerd-seq.png">
+<p><em>（图片来源于阿里云的公开课）</em></p>
+<p>图中的 containerEngine 在 docker 中就是 docker-containerd 组件，创建容器记录的metadata，并请求 containerd 的 task 模块，task 模块会在 runtime 中创建 task 实例，分别会加入 task list， 监控 cgroup 等操作，每个 task 实例则调用 shim 去创建container。</p>
+<h3 id="containerd-shim"><a href="#containerd-shim" class="headerlink" title="containerd-shim"></a>containerd-shim</h3><p>containerd-shim 是 containerd 的一个组件，主要是用于剥离 containerd 守护进程与容器进程。containerd 通过 shim 调用 runc 的包函数来启动容器。当我们执行 <code>pstree</code> 命令时，可以看到如下的进程关系：</p>
+<img src="/深入理解container/ps-tree.png">
+<p>引入shim，允许runc 在创建和运行容器之后退出，并将 shim 作为容器的父进程，而不是 containerd 作为父进程，这样做的目的是当 containerd 进程挂掉，由于 shim 还正常运行，因此可以保证容器不受影响。此外，shim 也可以收集和报告容器的退出状态，不需要 containerd 来 wait 容器进程。</p>
+<p>当我们有需求去替换 runc 运行时工具库时，例如替换为安全容器 kata container 或 Google 研发的 gViser，则需要增加对应的shim(<a href="https://github.com/kata-containers/shim" target="_blank" rel="noopener">kata-shim</a>等)，以上两者均有自己实现的 shim。</p>
+<p>目前已有 shim v1 和 shim v2 两个版本，至于 K8s 如何使用 CRI 与 containerd 和 shim 交互，这部分将在下一篇博文中介绍。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/container/">container</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/K8s-cri-container.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          K8s、CRI 与 container
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019年度总结.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">2019年度总结</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#何为容器运行时"><span class="nav-number">1.</span> <span class="nav-text">何为容器运行时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#low-level-runtime"><span class="nav-number">2.</span> <span class="nav-text">low-level runtime</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#high-level-runtime"><span class="nav-number">3.</span> <span class="nav-text">high-level runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#containerd"><span class="nav-number">3.1.</span> <span class="nav-text">containerd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#containerd-shim"><span class="nav-number">3.2.</span> <span class="nav-text">containerd-shim</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

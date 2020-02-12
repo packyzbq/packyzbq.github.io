@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>istio-出入站流量管理 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="istioserviceMesh">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="本文记录一下有关 istio gateway 的相关概念，并记录一下以 httpbin 为例的 gateways 应用">
+<meta name="keywords" content="istio,serviceMesh">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio-出入站流量管理">
+<meta property="og:url" content="http://packyzbq.github.io/gateway-case.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="本文记录一下有关 istio gateway 的相关概念，并记录一下以 httpbin 为例的 gateways 应用">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/istio-header.png">
+<meta property="og:updated_time" content="2020-01-08T03:10:44.294Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="istio-出入站流量管理">
+<meta name="twitter:description" content="本文记录一下有关 istio gateway 的相关概念，并记录一下以 httpbin 为例的 gateways 应用">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/istio-header.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-gateway-case" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/istio-header.png" rel="gallery_ck6hnf70c003ps8ulmg5wahto">
+        <img src="/gallery/istio-header.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      istio-出入站流量管理
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/gateway-case.html" class="article-date">
+	  <time datetime="2019-09-26T00:46:32.000Z" itemprop="datePublished">September 26, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文记录一下有关 istio gateway 的相关概念，并记录一下以 httpbin 为例的 gateways 应用</p>
+<a id="more"></a>
+
+<h2 id="gateways"><a href="#gateways" class="headerlink" title="gateways"></a>gateways</h2><p>在 istio 服务网格中，所有的服务都是在 K8s 集群内部，无法通过外部网络访问的；同时内部服务也无法访问到外部网络。因此，在 istio 中，默认在 istio-system namespace下部署了一个网关服务的pod，通过<code>kubectl get pod --selector=istio=ingressgateway --all-namespaces</code> 命令可以找到。此 pod 会将代理的流量全部转向不同的 K8s service。同时也部署了一个 LoadBalancer 模式的 svc。<code>kubectl get svc -n istio-system --selector=istio=ingressgateway</code>。这个 svc 暴露了一系列端口，分别对应不同的协议（L4-L7）。</p>
+<!-- ![gateway-service](gateway-case/gateway-service.png) -->
+<img src="/gateway-case/gateway-service.png">
+
+<p>若 K8s 平台直接通过 kubespary 或 kubeadm 部署，没有外部的 loadBalancer， 则 <code>externalIP</code> 状态会保持为 <code>&lt;pending&gt;</code>，这时需要通过 node ip 来访问。 我这里自己部署了 LB <a href="https://metallb.universe.tf/" target="_blank" rel="noopener">（metallb）</a>，因此有可用的 externalIP。</p>
+<p>gateway 是 istio 定义的 CRD 资源。gateway 可以通过配置，实现接管访问某个 hosts/service 的流量，以及决定这些流量将流向内部的哪个服务及端口。</p>
+<h3 id="gateway-配置"><a href="#gateway-配置" class="headerlink" title="gateway 配置"></a>gateway 配置</h3><p>一个示例</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">my-gateway</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">some-config-namespace</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">my-gateway-controller</span> <span class="comment"># 默认使用istio gateway标签:  istio: ingressgateway</span></span><br><span class="line"><span class="attr">  servers:</span>  <span class="comment"># 允许路由到多个服务</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">uk.bookinfo.com</span>  <span class="comment"># VirtualService 路由的host</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">eu.bookinfo.com</span></span><br><span class="line"><span class="attr">    tls:</span></span><br><span class="line"><span class="attr">      httpsRedirect:</span> <span class="literal">true</span> <span class="comment"># sends 301 redirect for http requests</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">443</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">https-443</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTPS</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">uk.bookinfo.com</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">eu.bookinfo.com</span></span><br><span class="line"><span class="attr">    tls:</span></span><br><span class="line"><span class="attr">      mode:</span> <span class="string">SIMPLE</span> <span class="comment"># enables HTTPS on this port</span></span><br><span class="line"><span class="attr">      serverCertificate:</span> <span class="string">/etc/certs/servercert.pem</span></span><br><span class="line"><span class="attr">      privateKey:</span> <span class="string">/etc/certs/privatekey.pem</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">9443</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">https-9443</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTPS</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"bookinfo-namespace/*.bookinfo.com"</span>  <span class="comment"># 允许路由到其他 namespace 下的 VirtualService，以 namespace/hosts 的形式。</span></span><br><span class="line"><span class="attr">    tls:</span></span><br><span class="line"><span class="attr">      mode:</span> <span class="string">SIMPLE</span> <span class="comment"># enables HTTPS on this port</span></span><br><span class="line"><span class="attr">      credentialName:</span> <span class="string">bookinfo-secret</span> <span class="comment"># fetches certs from Kubernetes secret</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">9080</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">http-wildcard</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"*"</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">2379</span> <span class="comment"># to expose internal service via external port 2379</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">mongo</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">MONGO</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"*"</span></span><br><span class="line"><span class="comment"># end</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置中，主要包含了 selector、servers<br>其中 selector 指定的是 gateway 使用的 gateway controller， 指定了一系列 pod，默认设置 <code>istio: ingressgateway</code> 使用 istio-system 下的 gateway pod。</p>
+<p>Server 中包含 port、hosts、defaultEndpoint 和 tls</p>
+<ul>
+<li>port:<ul>
+<li>number 端口号</li>
+<li>protocol： 端口暴露的协议，<code>HTTP|HTTPS|GRPC|HTTP2|MONGO|TCP|TLS</code> 之中的一种</li>
+</ul>
+</li>
+<li>hosts：<br>名称格式必须是 FQDN （全限定域名 e.g. example.com），可以通过添加前缀 <code>namesapce/</code>限定作用域 <strong>#TODO 跨namespace 没有弄懂</strong><blockquote>
+<p>VirtualService 必须与一个 gateway 绑定，且 hosts 必须严格匹配</p>
+</blockquote>
+</li>
+<li>tls: 安全认证的一系列操作</li>
+<li>defaultEndpointL: 默认情况下应将流量转发到的环回IP端点或Unix域套接字</li>
+</ul>
+<h4 id="安全配置"><a href="#安全配置" class="headerlink" title="安全配置"></a>安全配置</h4><p>在配置中可以使用 tls 进行安全认证的配置，主要有以下几个参数：</p>
+<ul>
+<li><p>mode：</p>
+<ul>
+<li>PASSTHROUGH：客户端提供的SNI字符串将用作 VirtualService TLS 路由中的匹配条件，以确定服务注册表中的目标服务。</li>
+<li>SIMPLE: 标准 TLS</li>
+<li>MUTUAL: 使用服务器证书保证下游网络认证</li>
+<li>AUTO_PASSTHROUGH: </li>
+<li>ISTIO_MUTUAL: 与 MUTUAL 相同，不过这个模式使用 Istio 自动生成的证书，当使用这个模式，<strong>所有其他的<code>TLSOptions</code>字段需要为空</strong></li>
+</ul>
+</li>
+<li><p>httpsRedirect: 是否重定向为 https</p>
+</li>
+<li><p>serverCertificate: <code>SIMPLE&amp;MUTUAL 必须</code>，server端 TLS证书路径</p>
+</li>
+<li><p>privatekey: <code>SIMPLE&amp;MUTUAL 必须</code>,server 密钥路径</p>
+</li>
+<li><p>caCertificates：<code>MUTUAL 必须</code> 证书路径，用于验证客户端证书<br>其他参数见 <a href="https://istio.io/docs/reference/config/networking/v1alpha3/gateway/" target="_blank" rel="noopener">istio reference</a></p>
+</li>
+</ul>
+<h2 id="出站"><a href="#出站" class="headerlink" title="出站"></a>出站</h2><h3 id="访问外部网站"><a href="#访问外部网站" class="headerlink" title="访问外部网站"></a>访问外部网站</h3><p>在 istio 安装选项中，<code>global.outboundTrafficPollicy.mode</code>配置了 istio 如何处理出站流量（即访问未注册的外部服务），其选项如下：</p>
+<ul>
+<li>ALLOW_ANY (default): 允许直连</li>
+<li>REGISTRY_ONLY： Istio代理会阻止没有在网格中定义HTTP服务或服务条目的任何主机服务</li>
+</ul>
+<blockquote>
+<p>可以通过 <code>kubectl get configmap istio -n istio-system -o yaml | grep -o &quot;mode: ALLOW_ANY&quot;</code> 检查选项，并用 <code>kubectl replace</code> 修改</p>
+</blockquote>
+<p>当 <code>mode</code> 配置为 REGISTRY_ONLY，需要使用 ServiceEntry 进行注册。</p>
+<p>此外， VirtualService 仍然适用于 ServiceEntry，即可以通过定义 timeout 或 weight 对外部服务访问进行管理。例如:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">httpbin-ext</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">httpbin.org</span></span><br><span class="line"><span class="attr">  http:</span></span><br><span class="line"><span class="attr">  - timeout:</span> <span class="number">3</span><span class="string">s</span>     <span class="comment"># 设置3秒超时， 若超时则返回 503/504</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">      - destination:</span></span><br><span class="line"><span class="attr">          host:</span> <span class="string">httpbin.org</span></span><br><span class="line"><span class="attr">        weight:</span> <span class="number">100</span> <span class="comment"># 设置流量控制</span></span><br></pre></td></tr></table></figure>
+
+<p>在调用外部网址时，可能会遇到一些安全问题，需要对请求数据加密等，因此也需要 TLS 介入。具体的做法是：<strong>为外部服务定义 VirtualService，并将 80 端口的访问重定向到 443 端口，并添加 DestinationRule 设置 TLS mode=SIMPLE</strong></p>
+<blockquote>
+<p>由于应用程序容器与本地主机上的 sidecar 代理之间的流量仍未加密，因此能够穿透应用程序节点的攻击者仍将能够看到该节点的本地网络上未加密的通信。严格意义上，应用间的调用都需要使用 HTTPS</p>
+</blockquote>
+<h3 id="出站网关"><a href="#出站网关" class="headerlink" title="出站网关"></a>出站网关</h3><p>出站网关主要的应用场景，是服务网格中的流量需要通过一个或几个特定的节点流出，访问互联网或其他服务。</p>
+<ol>
+<li><p>首先需要建立一个 ServiceEntry，指定出站的 host 以及规则</p>
+</li>
+<li><p>设置出站 gateway</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">istio-egressgateway</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    istio:</span> <span class="string">egressgateway</span></span><br><span class="line"><span class="attr">  servers:</span></span><br><span class="line">  <span class="comment"># 非 TLS 访问</span></span><br><span class="line"><span class="attr">  - port:</span></span><br><span class="line"><span class="attr">      number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">HTTP</span></span><br><span class="line"><span class="attr">    hosts:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">edition.cnn.com</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置 VirtualService 和 DestinationRule</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">direct-cnn-through-egress-gateway</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  hosts:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">edition.cnn.com</span></span><br><span class="line"><span class="attr">  gateways:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">istio-egressgateway</span>  <span class="comment"># 转发网格外部流量</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">mesh</span>                 <span class="comment"># 处理网格内部流量</span></span><br><span class="line"><span class="attr">  http:</span></span><br><span class="line"><span class="attr">  - match:</span></span><br><span class="line"><span class="attr">    - gateways:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">mesh</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">    - destination:</span></span><br><span class="line"><span class="attr">        host:</span> <span class="string">istio-egressgateway.istio-system.svc.cluster.local</span></span><br><span class="line"><span class="attr">        subset:</span> <span class="string">cnn</span></span><br><span class="line"><span class="attr">        port:</span></span><br><span class="line"><span class="attr">          number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      weight:</span> <span class="number">100</span></span><br><span class="line"><span class="attr">  - match:</span></span><br><span class="line"><span class="attr">    - gateways:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">istio-egressgateway</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">    route:</span></span><br><span class="line"><span class="attr">    - destination:</span></span><br><span class="line"><span class="attr">        host:</span> <span class="string">edition.cnn.com</span></span><br><span class="line"><span class="attr">        port:</span></span><br><span class="line"><span class="attr">          number:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      weight:</span> <span class="number">100</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>vs 中设置了两个 gateway，其中 mesh 用于处理网格内部流量，即网格内部服务访问 edition.cnn.com 时，流量将转发到 istio-egressgateway 服务所在的 pod，并流出网格。 istio-egressgateway 用于处理外部网络。</p>
+<p>destination 表示会把所有路由后的流量导入istio-egressgateway.istio-system.svc.cluster.local service的cnn sbuset下的80端口</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DestinationRule</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">egressgateway-for-cnn</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  host:</span> <span class="string">istio-egressgateway.istio-system.svc.cluster.local</span></span><br><span class="line"><span class="attr">  subsets:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">cnn</span></span><br></pre></td></tr></table></figure>
+
+<p>dr 最终将流量转到 egress 的 pod。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/istio/">istio</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/serviceMesh/">serviceMesh</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/jaeger-istio.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          jaeger 在 istio 上的实践
+        
+      </div>
+    </a>
+  
+  
+    <a href="/docker-相关问题.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">docker 运维</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#gateways"><span class="nav-number">1.</span> <span class="nav-text">gateways</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gateway-配置"><span class="nav-number">1.1.</span> <span class="nav-text">gateway 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安全配置"><span class="nav-number">1.1.1.</span> <span class="nav-text">安全配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#出站"><span class="nav-number">2.</span> <span class="nav-text">出站</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#访问外部网站"><span class="nav-number">2.1.</span> <span class="nav-text">访问外部网站</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#出站网关"><span class="nav-number">2.2.</span> <span class="nav-text">出站网关</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>k8s 架构 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="k8s">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="K8s 组件清单">
+<meta name="keywords" content="k8s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s 架构">
+<meta property="og:url" content="http://packyzbq.github.io/架构.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="K8s 组件清单">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-01-08T03:10:17.113Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="K8s 架构">
+<meta name="twitter:description" content="K8s 组件清单">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-架构" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      K8s 架构
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/架构.html" class="article-date">
+	  <time datetime="2019-08-27T06:58:43.000Z" itemprop="datePublished">August 27, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="K8s-组件清单"><a href="#K8s-组件清单" class="headerlink" title="K8s 组件清单"></a>K8s 组件清单</h2><a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>功能</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>kubeadm</td>
+<td>主要用于 K8s 部署</td>
+<td></td>
+</tr>
+<tr>
+<td>etcd</td>
+<td>用于存储 K8s 内部信息（包括 node pod 等）</td>
+<td>奇数节点部署</td>
+</tr>
+<tr>
+<td>coredns</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>cni-plugins</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kubelet</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-apiserver</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-controller-manager</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-scheduler</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-proxy</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-state-metrics</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kube-rbac-proxy</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ingress-nginx-controller</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kubernetes-dashboard</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>metrics-server</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>K8s的主要架构组件分为两个部分：</p>
+<ul>
+<li>master主节点</li>
+<li>node 工作节点</li>
+</ul>
+<p>其中在 master 主节点中，包括：</p>
+<ul>
+<li>etcd（用于存储 K8s 集群的信息，包括 pod deployment 等）</li>
+<li>API 服务器</li>
+<li>调度器</li>
+<li>node controller</li>
+</ul>
+<p>node 节点包括：</p>
+<ul>
+<li>kubelet </li>
+<li>kube proxy</li>
+<li>容器运行时</li>
+</ul>
+<p>节点是承载 K8s 的资源，因此我们先从 K8s 对节点的管理说起</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h2><p>node 状态包含一下信息：</p>
+<ul>
+<li>地址： 包括<strong>域名</strong>（kubelet –hostname-override 修改），<strong>外部Ip</strong>，<strong>内部ip</strong></li>
+<li>状态： Ready OutofDisk等</li>
+<li>容量：</li>
+<li>信息</li>
+</ul>
+<h3 id="node-状态"><a href="#node-状态" class="headerlink" title="node 状态"></a>node 状态</h3><p>当一个节点处于 <em>非 Ready</em> 状态超过 <code>pod-eviction-timeout</code>，节点控制器会向<strong>kube-controller-manager</strong>传递参数，来驱逐已经调度到当前节点的 pod。（默认时间是 5 min）</p>
+<p>某些情况下，节点无法通信（api server 与节点的 kubelet 失联），pod 无法立即删除直到重新连接，这段时间里，pod 仍运行在失联的节点上。在 1.5 之后，节点控制器<strong>不会强制删除pod信息</strong>，直至在集群中确认没有这些 pod。这个情况中， pod 会以 <code>Termiating</code> <code>Unknown</code>状态存在，这些 pod 则需要手动删除。</p>
+<h3 id="node-管理"><a href="#node-管理" class="headerlink" title="node 管理"></a>node 管理</h3><p>node 在集群中仍是“资源”的形式存在，K8s 会根据资源的描述（如下）检测节点是否处于可用状态</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"kind"</span>: <span class="string">"Node"</span>,</span><br><span class="line">  <span class="attr">"apiVersion"</span>: <span class="string">"v1"</span>,</span><br><span class="line">  <span class="attr">"metadata"</span>: &#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"10.240.79.157"</span>,</span><br><span class="line">    <span class="attr">"labels"</span>: &#123;</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"my-first-k8s-node"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>K8s 如果拥有一个 node 的资源，则会不断测试该节点是否可用（启用线程），因此移除节点时，最好删除掉在 K8s 中的 node 资源。</p>
+</blockquote>
+<h3 id="node-controller"><a href="#node-controller" class="headerlink" title="node controller"></a>node controller</h3><p>主要负责 node 的管理：</p>
+<ul>
+<li>为节点分配 CIDR 块</li>
+<li>维护节点状态，并与云提供商底层状态同步</li>
+<li>节点健康检查（40s 超时上报心跳， 5min 超时并开始驱散 pod, 设置检查节点健康间隔时间<code>--node-monitor-period</code>）<blockquote>
+<p>1.13 之后的版本，可以通过 <em>NodeLease</em> 特性进行健康检查，</p>
+</blockquote>
+</li>
+</ul>
+<p><em>未完待续。。。</em></p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/">k8s</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/systemd-vs-cgroupfs.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          systemd-vs-cgroupfs
+        
+      </div>
+    </a>
+  
+  
+    <a href="/docker僵死问题.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">docker僵死问题</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#K8s-组件清单"><span class="nav-number">1.</span> <span class="nav-text">K8s 组件清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node"><span class="nav-number">2.</span> <span class="nav-text">Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#node-状态"><span class="nav-number">2.1.</span> <span class="nav-text">node 状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#node-管理"><span class="nav-number">2.2.</span> <span class="nav-text">node 管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#node-controller"><span class="nav-number">2.3.</span> <span class="nav-text">node controller</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

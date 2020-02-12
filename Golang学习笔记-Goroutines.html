@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>golang学习笔记-goroutines | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="golang,goroutines">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="本篇是对 goroutines 的学习笔记">
+<meta name="keywords" content="golang,goroutines">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang学习笔记-Goroutines">
+<meta property="og:url" content="http://packyzbq.github.io/Golang学习笔记-Goroutines.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="本篇是对 goroutines 的学习笔记">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/golang.png">
+<meta property="og:updated_time" content="2019-11-21T07:45:00.110Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang学习笔记-Goroutines">
+<meta name="twitter:description" content="本篇是对 goroutines 的学习笔记">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/golang.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-Golang学习笔记-Goroutines" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/golang.png" rel="gallery_ck6hnf6xt0008s8ul64nyvgxs">
+        <img src="/gallery/golang.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      Golang学习笔记-Goroutines
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/Golang学习笔记-Goroutines.html" class="article-date">
+	  <time datetime="2019-11-20T02:15:13.000Z" itemprop="datePublished">November 20, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本篇是对 goroutines 的学习笔记</p>
+<a id="more"></a>
+<h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><p>首先 go 是一个实现并发的语言，并非并行</p>
+<h3 id="并发-vs-并行"><a href="#并发-vs-并行" class="headerlink" title="并发 vs 并行"></a>并发 vs 并行</h3><p>并行是在同一时间内，可以同时执行多个任务；并发则是在一个时间片内只能执行单一任务，并把一段时间切分为多个时间片，不同时间片执行不同任务，在宏观上看像是在一段时间内同时执行了多个任务。如下图：</p>
+<img src="/Golang学习笔记-Goroutines/concurrency-parallelism-copy.png">
+<p>并行不会总是导致更快的执行时间。这是因为并行运行的组件可能必须相互通信。在组件在多个内核中并行运行的情况下，此通信开销很高。因此，并行程序并不总是能够缩短执行时间</p>
+<p>在golang 中使用 goroutines 和 channel 实现并发。</p>
+<h2 id="什么是-Goroutines"><a href="#什么是-Goroutines" class="headerlink" title="什么是 Goroutines"></a>什么是 Goroutines</h2><p>Goroutine是与其他函数或方法同时运行的函数或方法。可以认为它是轻量级的线程。与线程相比，创建Goroutine的成本很小。因此，Go应用程序具有成千上万个同时运行的Goroutine。</p>
+<h2 id="Goroutine-的优势"><a href="#Goroutine-的优势" class="headerlink" title="Goroutine 的优势"></a>Goroutine 的优势</h2><p>与线程相比，goroutines非常轻量。它们的堆栈大小只有几kb，并且堆栈可以根据应用程序的需要进行扩展和收缩，而对于线程，则必须指定堆栈大小并加以固定。</p>
+<p>Goroutines在多路复用时会使用更少的OS线程。在具有数千个Goroutine的程序中，可能只有一个线程。如果该线程块中的任何Goroutine说正在等待用户输入，则将创建另一个OS线程，并将其余的Goroutine移至新的OS线程。作为程序员，我们从这些复杂的细节中抽象出来，并为它们提供了干净的API以进行并发工作。</p>
+<p>Goroutine使用 channel 进行通信。通过设计通道，可以防止在使用Goroutines访问共享内存时发生争用情况。可以将 channel 视为与Goroutine进行通信的管道。</p>
+<h2 id="如何使用-Goroutine"><a href="#如何使用-Goroutine" class="headerlink" title="如何使用 Goroutine"></a>如何使用 Goroutine</h2><p>在函数调用时，增加 <code>go</code> 关键字即可</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (  </span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">hello</span><span class="params">()</span></span> &#123;  </span><br><span class="line">    fmt.Println(<span class="string">"Hello world goroutine"</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;  </span><br><span class="line">    <span class="keyword">go</span> hello()  <span class="comment">// 开启一个新的 goroutine</span></span><br><span class="line">    fmt.Println(<span class="string">"main function"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main 函数中创建了一个 goroutine，此时执行 main 函数的线程则称为<strong>主goroutine</strong>(可以理解为父进程)<br>然而这段程序只输出<code>main function</code>，这是为什么呢，首先我们需要知道两条 goroutine的特性</p>
+<ol>
+<li>Goroutine 的调用时立刻返回的，并执行下一行代码。而且 Goroutine 的返回值将会被忽略</li>
+<li>主Goroutine正在运行，其他任何Goroutine才能运行。如果主Goroutine终止，则程序将终止，并且其他Goroutine将不会运行。</li>
+</ol>
+<p>在上述代码片中，主goroutine 开启 <code>hello()</code>后立刻打印 <code>main function</code>后退出，因此 <code>hello()</code>也并未执行完。可以在<code>go hello()</code> 后添加一行代码 <code>time.Sleep(1 * time.Second)</code>等待其完成（这样做只是为了理解 goroutine 机制，实际中需要使用 channel 来实现等待其他 goroutine 的执行）。</p>
+<h3 id="多-goroutine"><a href="#多-goroutine" class="headerlink" title="多 goroutine"></a>多 goroutine</h3><p>我们使用下面的代码加深一下理解</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (  </span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numbers</span><span class="params">()</span></span> &#123;  </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">5</span>; i++ &#123;</span><br><span class="line">        time.Sleep(<span class="number">250</span> * time.Millisecond)</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>, i)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">alphabets</span><span class="params">()</span></span> &#123;  </span><br><span class="line">    <span class="keyword">for</span> i := <span class="string">'a'</span>; i &lt;= <span class="string">'e'</span>; i++ &#123;</span><br><span class="line">        time.Sleep(<span class="number">400</span> * time.Millisecond)</span><br><span class="line">        fmt.Printf(<span class="string">"%c "</span>, i)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;  </span><br><span class="line">    <span class="keyword">go</span> numbers()</span><br><span class="line">    <span class="keyword">go</span> alphabets()</span><br><span class="line">    time.Sleep(<span class="number">3000</span> * time.Millisecond)</span><br><span class="line">    fmt.Println(<span class="string">"main terminated"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码的执行流程如图所示</p>
+<img src="/Golang学习笔记-Goroutines/goroutines.png">
+
+<p>图像的第一部分蓝色代表数字Goroutine，栗色的第二部分代表字母Goroutine，绿色的第三部分代表主Goroutine，黑色的最后一部分将上述三个全部合并，并向我们展示了程序的执行时序。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/Golang学习笔记-Channel.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Golang学习笔记-Channel
+        
+      </div>
+    </a>
+  
+  
+    <a href="/Golang学习笔记-Interface.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Golang学习笔记--Interface</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#并发"><span class="nav-number">1.</span> <span class="nav-text">并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#并发-vs-并行"><span class="nav-number">1.1.</span> <span class="nav-text">并发 vs 并行</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Goroutines"><span class="nav-number">2.</span> <span class="nav-text">什么是 Goroutines</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Goroutine-的优势"><span class="nav-number">3.</span> <span class="nav-text">Goroutine 的优势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何使用-Goroutine"><span class="nav-number">4.</span> <span class="nav-text">如何使用 Goroutine</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多-goroutine"><span class="nav-number">4.1.</span> <span class="nav-text">多 goroutine</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

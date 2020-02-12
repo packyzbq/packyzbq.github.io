@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>cncf 周报 2020-2-2 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="KubeWeekly">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="keywords" content="KubeWeekly">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CNCF 周报 2020-2-2">
+<meta property="og:url" content="http://packyzbq.github.io/KubeWeekly-201.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/kubeweekly.jpg">
+<meta property="og:image" content="http://packyzbq.github.io/KubeWeekly-201/research4develop.png">
+<meta property="og:updated_time" content="2020-02-11T08:53:46.553Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CNCF 周报 2020-2-2">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/kubeweekly.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-KubeWeekly-201" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      CNCF 周报 2020-2-2
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/KubeWeekly-201.html" class="article-date">
+	  <time datetime="2020-02-02T12:10:46.000Z" itemprop="datePublished">February 2, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/gallery/kubeweekly.jpg" alt></p>
+<a id="more"></a>
+<h2 id="要闻"><a href="#要闻" class="headerlink" title="要闻"></a>要闻</h2><h3 id="Kubernetes-发布-v1-18-0-alpha-2-版本"><a href="#Kubernetes-发布-v1-18-0-alpha-2-版本" class="headerlink" title="Kubernetes 发布 v1.18.0-alpha.2 版本"></a>Kubernetes 发布 v1.18.0-alpha.2 版本</h3><p>这次更新变更东西比较多，以下是我个人认为比较重要的点：</p>
+<ul>
+<li>Secret 和 ConfigMap 引入 alpha 属性 <code>Immutable</code>，需要开启<code>ImmutableEphemeralVolumes</code> 的 Feature Gate</li>
+<li><code>kubectl apply -f &lt;file&gt; --prune -n &lt;namespace&gt;</code> 此指令增加接收特定的 namespace。 <a href="https://github.com/kubernetes/kubernetes/pull/85613" target="_blank" rel="noopener">#85613</a></li>
+<li>kubelet 将一些 metrics endpoint 设为过期</li>
+<li>现在可以将 <code>--node-ip ::</code> 传递给kubelet，默认设置 IPv6 地址为主地址。<a href="https://github.com/kubernetes/kubernetes/pull/85850" target="_blank" rel="noopener">#85850</a></li>
+<li>kubeadm 在拉取镜像失败后，可以增加重试次数，默认为5次</li>
+<li>kubeadm 使用bind-address选项配置kube-controller-manager和kube-scheduler 的http探针</li>
+<li>调度策略部分抛弃了 <code>AlwaysCheckAllPredicates</code> API</li>
+<li>hollow node 不再使用远程的 CRI，使用 fake CRI <a href="https://github.com/kubernetes/kubernetes/pull/86425" target="_blank" rel="noopener">#86425</a> <a href="https://github.com/kubernetes/kubernetes/pull/85879" target="_blank" rel="noopener">#85879</a></li>
+</ul>
+<p><a href="https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.18.md#changelog-since-v1180-alpha1" target="_blank" rel="noopener">change log</a></p>
+<h3 id="Linkerd-发布-edge-20-1-4-版本"><a href="#Linkerd-发布-edge-20-1-4-版本" class="headerlink" title="Linkerd 发布 edge-20.1.4 版本"></a>Linkerd 发布 edge-20.1.4 版本</h3><p>此版本针对 cli 增加了三处更新</p>
+<p><a href="https://github.com/linkerd/linkerd2/releases" target="_blank" rel="noopener">release note</a></p>
+<h3 id="CoreDNS-v1-6-7-发布"><a href="#CoreDNS-v1-6-7-发布" class="headerlink" title="CoreDNS v1.6.7 发布"></a>CoreDNS v1.6.7 发布</h3><p>本周 CoreDNS 有小版本更新，主要更新如下：</p>
+<ul>
+<li>plugin/{kubernetes, etcd}: 允许通过 CNAME 解析 TXT 记录。这个更新是为 <code>backend_lookup.go</code> 中的 TXT 方法增加一个参数。目前 kubernetes 和 etcd 插件的相关调用已经更新，如果有第三方或自己实现的插件，需要注意。</li>
+</ul>
+<h3 id="一个有意思的调查"><a href="#一个有意思的调查" class="headerlink" title="一个有意思的调查"></a>一个有意思的调查</h3><img src="/KubeWeekly-201/research4develop.png">
+<p>之前在 twitter 上发起了一个调查，是本地 K8s 开发者最常用的工具，分别是</p>
+<ul>
+<li>Kind（K8s in docker）</li>
+<li>k3d</li>
+<li>Minikube</li>
+<li>Docker Desktop</li>
+</ul>
+<p>目前最多使用的是 Minikube，Kind 之前也刚刚发布了新版本 v0.7.0，日后可以出一篇blog去专门对比一下这三个工具</p>
+<h2 id="上游进展"><a href="#上游进展" class="headerlink" title="上游进展"></a>上游进展</h2><p>Kubernetes 在上周相继发布了 v1.15.8，v1.16.5 以及 v1.17.1 三个版本，但这几个版本的构建信息有误，导致这周又相继发布了 v1.15.9, v1.16.6 以及 v1.17.2 版本。</p>
+<h2 id="项目推荐"><a href="#项目推荐" class="headerlink" title="项目推荐"></a>项目推荐</h2><h3 id="Chaos-Mesh"><a href="#Chaos-Mesh" class="headerlink" title="Chaos Mesh"></a>Chaos Mesh</h3><p>在分布式计算的世界中，群集随时随地都可能发生故障。传统上，我们使用单元测试和集成测试来确保系统已准备就绪，但是随着集群规模，复杂性数量和数据量（基于PB级别）的增加，这些测试仅涵盖冰山一角。为了更好地识别系统漏洞并提高弹性，Netflix发明了Chaos Monkey，并将各种类型的故障注入基础架构和业务系统。这就是Chaos Engineering的起源。</p>
+<p>Chaos Mesh是一个通用的Chaos Engineering（混沌工程）平台，具有针对Kubernetes上复杂系统的全方位故障注入方法，涵盖Pod，网络，文件系统甚至内核中的故障。由 TiDB 团队开发。</p>
+<p><strong>github</strong>: <a href="https://github.com/pingcap/chaos-mesh" target="_blank" rel="noopener">https://github.com/pingcap/chaos-mesh</a><br><strong>文章链接</strong>: <a href="https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/" target="_blank" rel="noopener">https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/</a></p>
+<h3 id="Vitness"><a href="#Vitness" class="headerlink" title="Vitness"></a>Vitness</h3><p>Vitess是一个用于部署，扩展和管理大型开源数据库实例集群的数据库解决方案。它目前支持MySQL和MariaDB。它在架构上可以像在专用硬件上一样有效地在公共或私有云架构中运行。它结合并扩展了许多重要的SQL功能以及NoSQL数据库的可伸缩性。</p>
+<p><strong>github</strong>: <a href="https://github.com/vitessio/vitess" target="_blank" rel="noopener">https://github.com/vitessio/vitess</a></p>
+<h3 id="KubeInvaders"><a href="#KubeInvaders" class="headerlink" title="KubeInvaders"></a>KubeInvaders</h3><p>在 K8s 官网中，近日发布了一个blog，介绍了一个混沌工程工具，Kubenvaders是一个针对Kubernetes和Openshift的游戏化混沌工程工具，可通过一种有趣的方式帮助测试Kubernetes集群的弹性。</p>
+<p>项目地址在 <a href="https://github.com/lucky-sideburn/KubeInvaders，" target="_blank" rel="noopener">https://github.com/lucky-sideburn/KubeInvaders，</a> 有兴趣的可以搞搞看</p>
+<h3 id="log-pilot"><a href="#log-pilot" class="headerlink" title="log-pilot"></a>log-pilot</h3><p>此工具用于收集容器中的标准日志以及指定路径的日志。大体也还是使用 fluntd 或 filebeat 进行收集，对于容器中指定路径的日志文件，大体思路是使用 emptyDir 将日志文件路径暴露出来，使其可在宿主机上看到，再进行追踪。</p>
+<p>项目地址 <a href="https://github.com/AliyunContainerService/log-pilot" target="_blank" rel="noopener">https://github.com/AliyunContainerService/log-pilot</a></p>
+<h2 id="文章推荐"><a href="#文章推荐" class="headerlink" title="文章推荐"></a>文章推荐</h2><p>多种 K8s 测试工具对比 <a href="https://medium.com/altoros-blog/a-comparative-analysis-of-kubernetes-testing-tools-kube-bench-test-infra-sonobuoy-and-f4de5869a107" target="_blank" rel="noopener">A Comparative Analysis of Kubernetes Testing Tools: kube-bench, test-infra, Sonobuoy, and PowerfulSeal</a></p>
+<p><a href="https://medium.com/@OPTASY.com/what-are-the-best-continuous-deployment-tools-for-kubernetes-and-why-top-5-c5f42e44983d" target="_blank" rel="noopener">《What Are the Best Continuous Deployment Tools for Kubernetes and Why? Top 5》</a></p>
+<p>从操作系统底层拆解容器技术：<br><a href="http://from.flipboard.com/topic/kubernetes?url=https%3A%2F%2Fitnext.io%2Fbreaking-down-containers-part-0-system-architecture-37afe0e51770%3Fgi%3D8a915202861&v=1TIxP8dTtTQ2YUU95w0uzBsjEoHSpLWPxvmzGYXWtKoAAAFwBh1Z6w" target="_blank" rel="noopener">Breaking Down Containers | Part 0 — System Architecture</a></p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/CNCF周报/">CNCF周报</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/KubeWeekly/">KubeWeekly</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/kubelet源码分析.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          kubelet源码分析--启动篇
+        
+      </div>
+    </a>
+  
+  
+    <a href="/Kubeweekly.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CNCF 生态周报 2020-01-21</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#要闻"><span class="nav-number">1.</span> <span class="nav-text">要闻</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-发布-v1-18-0-alpha-2-版本"><span class="nav-number">1.1.</span> <span class="nav-text">Kubernetes 发布 v1.18.0-alpha.2 版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linkerd-发布-edge-20-1-4-版本"><span class="nav-number">1.2.</span> <span class="nav-text">Linkerd 发布 edge-20.1.4 版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CoreDNS-v1-6-7-发布"><span class="nav-number">1.3.</span> <span class="nav-text">CoreDNS v1.6.7 发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个有意思的调查"><span class="nav-number">1.4.</span> <span class="nav-text">一个有意思的调查</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上游进展"><span class="nav-number">2.</span> <span class="nav-text">上游进展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#项目推荐"><span class="nav-number">3.</span> <span class="nav-text">项目推荐</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Chaos-Mesh"><span class="nav-number">3.1.</span> <span class="nav-text">Chaos Mesh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vitness"><span class="nav-number">3.2.</span> <span class="nav-text">Vitness</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KubeInvaders"><span class="nav-number">3.3.</span> <span class="nav-text">KubeInvaders</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log-pilot"><span class="nav-number">3.4.</span> <span class="nav-text">log-pilot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文章推荐"><span class="nav-number">4.</span> <span class="nav-text">文章推荐</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>kubemark-使用记录 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="testkubemark">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="在 K8s 的使用中，我们会遇到这样一个场景，现有集群只有几个节点，但是我想模拟测试大规模集群时，集群的压力性能会表现如何呢？这里就需要用到 kubemark 了。">
+<meta name="keywords" content="test,kubemark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubemark-使用记录">
+<meta property="og:url" content="http://packyzbq.github.io/kubemark-使用记录.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="在 K8s 的使用中，我们会遇到这样一个场景，现有集群只有几个节点，但是我想模拟测试大规模集群时，集群的压力性能会表现如何呢？这里就需要用到 kubemark 了。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+<meta property="og:updated_time" content="2020-01-02T01:53:23.610Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kubemark-使用记录">
+<meta name="twitter:description" content="在 K8s 的使用中，我们会遇到这样一个场景，现有集群只有几个节点，但是我想模拟测试大规模集群时，集群的压力性能会表现如何呢？这里就需要用到 kubemark 了。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-kubemark-使用记录" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6hnf6yp001os8ulqxuhtz24">
+        <img src="/gallery/k8s-header.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      kubemark-使用记录
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/kubemark-使用记录.html" class="article-date">
+	  <time datetime="2020-01-01T06:23:33.000Z" itemprop="datePublished">January 1, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在 K8s 的使用中，我们会遇到这样一个场景，现有集群只有几个节点，但是我想模拟测试大规模集群时，集群的压力性能会表现如何呢？这里就需要用到 kubemark 了。</p>
+<a id="more"></a>
+
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>kubemark 是 K8s 官方给出的性能测试工具，能够不受任何资源限制，模拟出一个大规模 K8s 集群。其主要架构如图所示:</p>
+<img src="/kubemark-使用记录/arch.png">
+<p>需要一个外部 K8s 集群（external cluster） 以及一个机器节点运行 kubemark master，即另外一个 K8s 集群，但是只有一个 master 节点。我们需要在 external cluster 中部署运行 hollow pod，这些 pod 会主动向 kubemark 集群注册，并成为 kubemark 集群中的 hollow node(虚拟节点)。然后我们就可以在 kubemark 集群中进行 e2e 测试。虽然与真实集群的稍微有点误差，不过可以代表真实集群的数据。</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>我使用的版本是 v1.14.6</p>
+<h3 id="构建-kubemark-镜像"><a href="#构建-kubemark-镜像" class="headerlink" title="构建 kubemark 镜像"></a>构建 kubemark 镜像</h3><p>首先需要下载下来 K8s 的源代码，并切换到对应分支上。然后执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make quick-release</span><br></pre></td></tr></table></figure>
+
+<p>编译出的二进制存储在 <code>_output</code> 目录下。</p>
+<blockquote>
+<p>注意，在编译过程中，需要 pull 一些镜像，可能需要翻墙，建议提前 pull 下来。主要用到的镜像有：</p>
+<ul>
+<li>k8s.gcr.io/kube-cross:v1.12.5-1</li>
+<li>k8s.gcr.io/debian-base-amd64:v1.0.0</li>
+<li>k8s.gcr.io/debian-iptables-amd64:v11.0.2</li>
+</ul>
+</blockquote>
+<p>然后进入到 <code>$KUBE_SRC/cluster/images/kubemark</code> 目录下，将编译得到的 kubemark 二进制复制到该目录下，并执行以下命令打镜像。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t kubemark:latest .</span><br></pre></td></tr></table></figure>
+
+<h3 id="kubemark-master-搭建"><a href="#kubemark-master-搭建" class="headerlink" title="kubemark master 搭建"></a>kubemark master 搭建</h3><p>在 K8s 源码中，<code>test/kubemark/</code> 目录下包含了在本地启动 kubemark master 的脚本，但是我在测试过程中，遇见了茫茫多的问题（应该是小弟才疏学浅，搞不定），因此采用另一种方案，通过 kubeadm 或者 kubespary 部署一个单节点的 K8s 集群作为 kubemark master 节点。</p>
+<p>这里有个坑，就是需要将节点名称改为 xx-master，这样在后面跑 e2e 测试时，才会把该节点识别为master节点。具体源码如下，其他版本是否有这个问题，我暂时未去查找。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在 e2e 源码中，调用了pkg/util/system/system_utils.go 下面的方法判断是否为master节点</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">IsMasterNode</span><span class="params">(nodeName <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// We are trying to capture "master(-...)?$" regexp.</span></span><br><span class="line">	<span class="comment">// However, using regexp.MatchString() results even in more than 35%</span></span><br><span class="line">	<span class="comment">// of all space allocations in ControllerManager spent in this function.</span></span><br><span class="line">	<span class="comment">// That's why we are trying to be a bit smarter.</span></span><br><span class="line">	<span class="keyword">if</span> strings.HasSuffix(nodeName, <span class="string">"master"</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(nodeName) &gt;= <span class="number">10</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> strings.HasSuffix(nodeName[:<span class="built_in">len</span>(nodeName)<span class="number">-3</span>], <span class="string">"master-"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>此处需要注意的是，kubemark 集群部署时，不需要特定的网络插件，即 flannel 或 calico 之类的组件都不需要安装部署。若部署成功后，通过<code>kubectl get node</code>查看节点的状态是<code>NotReady</code>，则需要将 <code>/etc/kubernetes/kubelet.env</code>文件中的 <code>KUBELET_NETWORK_PLUGIN=&quot; --network-plugin=cni ...&quot;</code>注释掉，然后 <code>systemctl restart kubelet</code> 即可。</p>
+</blockquote>
+<p>在部署完成后，<code>kubectl get po -A</code>查看pod状态，可能会存在一些 “0/1” 状态的pod，则需要做以下操作</p>
+<ol>
+<li>删除 daemonSet 资源(包括 kube-proxy)，</li>
+<li>删除 deployment：autoscaler；</li>
+<li>删除 namespace：ingress-nginx</li>
+</ol>
+<p>如果还有其他的非 Running 状态pod，则需要做额外处理，直至所有pod 都处于<code>Running</code>状态。</p>
+<p>最后需要将 kubemark master 节点设置为 <code>unschedule</code></p>
+<h3 id="external-cluster"><a href="#external-cluster" class="headerlink" title="external cluster"></a>external cluster</h3><p>在外部集群中，需要加载以下镜像，用于kubemark 测试</p>
+<ul>
+<li>busybox</li>
+<li>k8s.gcr.io/heapster:v1.3.0</li>
+<li>kubemark(第一步中构建好的镜像)</li>
+<li>k8s.gcr.io/node-porblem-detector:v0.4.1</li>
+</ul>
+<p>需要准备以下文件：</p>
+<ul>
+<li>kernel-monitor.json</li>
+<li>hollow-node_template.yaml</li>
+<li>addon/heapster_template.json</li>
+<li>kubemark.kubeconfig (kubemark master的config)<br>前三个文件见连接 <a href="https://git.dev.tencent.com/packyzbq/kubemark-local.git" target="_blank" rel="noopener">https://git.dev.tencent.com/packyzbq/kubemark-local.git</a></li>
+</ul>
+<p>使用以下命令，创建 hollow-node 的pod</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">kubectl create ns kubemark</span><br><span class="line"></span><br><span class="line">kubectl create cm node-configmap -n kubemark --from-litera=content.type=&quot;&quot; --from-file=kernel.monitor=&quot;kernel-monitor.json&quot;</span><br><span class="line"></span><br><span class="line">kubectl create secret generic kubeconfig --type=Opaque --namespace=kubemark \</span><br><span class="line">--from-file=kubelet.kubeconfig=kubemark.kubeconfig \</span><br><span class="line">--from-file=kubeproxy.kubeconfig=kubemark.kubeconfig \</span><br><span class="line">--from-file=npd.kubeconfig=kubemark.kubeconfig \</span><br><span class="line">--from-file=heapster.kubeconfig=kubemark.kubeconfig \</span><br><span class="line">--from-file=cluster_autoscaler.kubeconfig=kubemark.kubeconfig \</span><br><span class="line">--from-file=dns.kubeconfig=kubemark.kubeconfig</span><br><span class="line"></span><br><span class="line">kubectl apply -f addon/ -n kubemark</span><br><span class="line"></span><br><span class="line">kubectl apply -f hollow-node_template.yaml -n kubemark</span><br></pre></td></tr></table></figure>
+
+<p>当 external cluster 中，所有 hollow node 的pod 处于 Running 状态后，在 kubemark master 节点执行 <code>kubectl get node</code>，则会出现对应的 hollow node。</p>
+<h3 id="执行-e2e-测试"><a href="#执行-e2e-测试" class="headerlink" title="执行 e2e 测试"></a>执行 e2e 测试</h3><p>e2e 测试需要获取 etcd 的 metrics 数据，但是在源码中通过 <code>curl http://localhost:2379/metrics</code> 获取的，而我们部署的 kubemark 集群中 etcd 的访问需要证书认证，因此还需要修改源码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  test/e2e/framework/metrics_util.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getEtcdMetrics</span><span class="params">()</span> <span class="params">([]*model.Sample, error)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> TestContext.Provider == <span class="string">"gke"</span> || TestContext.Provider == <span class="string">"eks"</span> &#123;</span><br><span class="line">                Logf(<span class="string">"Not grabbing etcd metrics through master SSH: unsupported for %s"</span>, TestContext.Provider)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    cmd := <span class="string">"curl -L https://localhost:2379/metrics --key &#123;your etcd key&#125; --cert &#123;your etcd cert&#125;"</span></span><br><span class="line">    sshResult, err := SSH(cmd, GetMasterHost()+<span class="string">":22"</span>, TestContext.Provider)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改完后，编译 e2e.test </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make WHAT=&quot;test/e2e/e2e.test&quot;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行以下命令进行 e2e 测试。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$KUBEROOT/_output/bin/e2e.test  --kube-master=xxx --host=http://127.0.0.1:8080 --ginkgo.focus=&quot;:Performance]&quot; --provider=local --kubeconfig=/var/run/kubernetes/admin.kubeconfig --num-nodes=1 --v=3 --ginkgo.failFast --e2e-output-dir=xxxx --report-dir=xxx</span><br></pre></td></tr></table></figure>
+
+<p>其中 num-nodes 参数需要依据 hollow node 的个数改变。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/踩坑之路/">踩坑之路</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kubemark/">kubemark</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/test/">test</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019年度总结.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          2019年度总结
+        
+      </div>
+    </a>
+  
+  
+    <a href="/Linux系统中的内存、swap、buffer.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Linux系统中的内存</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备"><span class="nav-number">2.</span> <span class="nav-text">准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#构建-kubemark-镜像"><span class="nav-number">2.1.</span> <span class="nav-text">构建 kubemark 镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubemark-master-搭建"><span class="nav-number">2.2.</span> <span class="nav-text">kubemark master 搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#external-cluster"><span class="nav-number">2.3.</span> <span class="nav-text">external cluster</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行-e2e-测试"><span class="nav-number">2.4.</span> <span class="nav-text">执行 e2e 测试</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

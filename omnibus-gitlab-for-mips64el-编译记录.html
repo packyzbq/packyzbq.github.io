@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>omnibus-gitlab-for-mips64el-编译记录 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="devops">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="由于公司在进行国产化，因此需要在 mips64 架构的服务器上编译 gitlab，并生成镜像。由于我第一次接触如何编译软件，同时 gitlab 的组件也确实有些复杂，导致我前前后后花了两周的时间完成。当然最后编译出的镜像还是偏大，仍需要优化，或需要对 gitlab 拆分成组件来编译成镜像。我的编译记录如下，希望对后来人有用吧！">
+<meta name="keywords" content="devops">
+<meta property="og:type" content="article">
+<meta property="og:title" content="omnibus-gitlab-for-mips64el-编译记录">
+<meta property="og:url" content="http://packyzbq.github.io/omnibus-gitlab-for-mips64el-编译记录.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="由于公司在进行国产化，因此需要在 mips64 架构的服务器上编译 gitlab，并生成镜像。由于我第一次接触如何编译软件，同时 gitlab 的组件也确实有些复杂，导致我前前后后花了两周的时间完成。当然最后编译出的镜像还是偏大，仍需要优化，或需要对 gitlab 拆分成组件来编译成镜像。我的编译记录如下，希望对后来人有用吧！">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/omnibus-gitlab-for-mips64el-编译记录/ruby_exception.png">
+<meta property="og:image" content="http://packyzbq.github.io/omnibus-gitlab-for-mips64el-编译记录/ruby_exception2.png">
+<meta property="og:image" content="http://packyzbq.github.io/omnibus-gitlab-for-mips64el-编译记录/ffi_error.png">
+<meta property="og:updated_time" content="2019-10-17T10:49:54.872Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="omnibus-gitlab-for-mips64el-编译记录">
+<meta name="twitter:description" content="由于公司在进行国产化，因此需要在 mips64 架构的服务器上编译 gitlab，并生成镜像。由于我第一次接触如何编译软件，同时 gitlab 的组件也确实有些复杂，导致我前前后后花了两周的时间完成。当然最后编译出的镜像还是偏大，仍需要优化，或需要对 gitlab 拆分成组件来编译成镜像。我的编译记录如下，希望对后来人有用吧！">
+<meta name="twitter:image" content="http://packyzbq.github.io/omnibus-gitlab-for-mips64el-编译记录/ruby_exception.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-omnibus-gitlab-for-mips64el-编译记录" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      omnibus-gitlab-for-mips64el-编译记录
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/omnibus-gitlab-for-mips64el-编译记录.html" class="article-date">
+	  <time datetime="2019-07-01T13:43:40.000Z" itemprop="datePublished">July 1, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>由于公司在进行国产化，因此需要在 mips64 架构的服务器上编译 gitlab，并生成镜像。由于我第一次接触如何编译软件，同时 gitlab 的组件也确实有些复杂，导致我前前后后花了两周的时间完成。当然最后编译出的镜像还是偏大，仍需要优化，或需要对 gitlab 拆分成组件来编译成镜像。我的编译记录如下，希望对后来人有用吧！</p>
+<a id="more"></a>
+
+<p>主要通过编译 gitlab 源码， 将其打包成镜像，不同架构打包不同镜像。<br>参考网址为（<a href="https://docs.gitlab.com/omnibus/build/prepare-build-environment.html）" target="_blank" rel="noopener">https://docs.gitlab.com/omnibus/build/prepare-build-environment.html）</a></p>
+<p>首先需要编译 ruby，<a href="ruby-编译.md">见文章</a></p>
+<p>##下载 gitlab 源码 </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 11.8 的 稳定 ce 版本</span></span><br><span class="line">git <span class="built_in">clone</span> https://gitlab.com/gitlab-org/gitlab-ce.git -b 11-8-stable gitlab</span><br></pre></td></tr></table></figure>
+
+<p>需要使用 gitlab-omnibus-builder 从 gitlab 源码构建</p>
+<h2 id="编译为二进制"><a href="#编译为二进制" class="headerlink" title="编译为二进制"></a>编译为二进制</h2><p>根据指导，执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bundle install --path .bundle --binstubs</span><br></pre></td></tr></table></figure>
+
+<p><strong>结果报错：</strong></p>
+<!-- ![error](omnibus-gitlab-for-mips64el-编译记录/ruby_exception.png) -->
+<img src="/omnibus-gitlab-for-mips64el-编译记录/ruby_exception.png">
+
+<p>根据提示，安装bundle 1.17.1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install bundle:1.17.1</span><br></pre></td></tr></table></figure>
+
+<p>安装成功，重新执行第一条指令</p>
+<p><strong>结果报错：</strong></p>
+<!-- ![error2](omnibus-gitlab-for-mips64el-编译记录/ruby_exception2.png) -->
+<img src="/omnibus-gitlab-for-mips64el-编译记录/ruby_exception2.png">
+<p>原因是找不到 mips64el 下的配置，需要更新：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">This script, last modified 2009-11-20, has failed to recognize</span><br><span class="line">the operating system you are using. It is advised that you</span><br><span class="line">download the most up to date version of the config scripts from</span><br><span class="line"></span><br><span class="line">  http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD</span><br><span class="line">and</span><br><span class="line">  http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD</span><br></pre></td></tr></table></figure>
+
+<p>找到依赖关系： In Gemfile:<br>  chefspec was resolved to 7.1.1, which depends on<br>    chef was resolved to 13.6.4, which depends on<br>      ohai was resolved to 13.7.1, which depends on<br>        ffi<br>尝试更新 chefspec的版本 7.1.1 =&gt; 7.3.4 但是依赖ffi 版本还是太低，没有 mips64el 相关的包，尝试直接在 Gemfile 中添加 ffi 高版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem &apos;ffi&apos;, &apos;~&gt; 1.11&apos;, &apos;&gt;= 1.11.1&apos;</span><br></pre></td></tr></table></figure>
+
+<p>结果报错：</p>
+<!-- ![ruby_error](omnibus-gitlab-for-mips64el-编译记录/ffi_error.png) -->
+<img src="/omnibus-gitlab-for-mips64el-编译记录/ffi_error.png">
+<p>这才发现 <code>Gemfile.lock</code> 文件里，把依赖的包锁定了（ruby 还有这种坑的啊！！？）</p>
+<blockquote>
+<p>gemfile.lock 文件是为了统一环境存在的</p>
+</blockquote>
+<p><strong>最后直接把 gemfile.lock 中的 ffi 版本设置为最高版本，各种依赖包安装成功</strong></p>
+<p>执行 <code>bin/omnibus build gitlab</code> 报错:</p>
+<p>经查看安装源码，发现源码中 gitlab 版本指定太高(<code>12.121.1-ce.1</code>)，修改以下文件，替换为<code>11.11.1+ce.0</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./spec/gitlab/build/image_spec.rb</span><br><span class="line">./spec/gitlab/build/info_spec.rb</span><br><span class="line">./lib/gitlab/build/info.rb</span><br></pre></td></tr></table></figure>
+
+<p>此外，本机的 git 版本为 1.8， <code>info_spec.rb</code>中使用了 <code>git tag --sort</code>指令， 此指令是 git 2.0 以上版本支持，因此修改为 <code>git tag | sort -rV</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./spec/gitlab/build/info_spec.rb</span><br><span class="line">./lib/gitlab/build/info.rb</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置环境变量-ALTERNATIVE-SOURCES-true"><a href="#设置环境变量-ALTERNATIVE-SOURCES-true" class="headerlink" title="设置环境变量 ALTERNATIVE_SOURCES=true"></a>设置环境变量 <code>ALTERNATIVE_SOURCES=true</code></h3><p>原因如下：</p>
+<blockquote>
+<p>Omnibus GitLab is optimized to use the internal repositories from dev.gitlab.org. These repositories are specified in the <code>.custom_sources.yml</code> file (specified by remote key) in the root of the source tree and will be used by default. Since these repositories are not publicly usable, for personal builds you have to use public alternatives of these repos. The alternatives are also provided in the same file, specified by alternative key. The selection between these two is controlled by <code>ALTERNATIVE_SOURCES</code> environment variable, which can be set either true or false. If that variable is set true, the repositories marked by alternative key will be used. Similarly, if you want to use your custom forks as sources, modify the <code>.custom_sources.yml</code> file and specify them as alternate and set the <code>ALTERNATIVE_SOURCES</code> variable to true.</p>
+</blockquote>
+<h3 id="设置环境变量COMPILE-ASSETS"><a href="#设置环境变量COMPILE-ASSETS" class="headerlink" title="设置环境变量COMPILE_ASSETS"></a>设置环境变量<code>COMPILE_ASSETS</code></h3><p>由于需要依赖自己编译的内容，因此需要设置这个环境变量</p>
+<blockquote>
+<p>By default, Omnibus GitLab uses a docker image containing pre-compiled assets for the config/software/gitlab-rails.rb<br>If you are building from a mirror of the GitLab application on the same instance, you should not need to do anything.<br>To use the upstream assets, set the <code>ASSET_REGISTRY</code> environment variable to registry.gitlab.com<br>To compile your own, set the <code>COMPILE_ASSETS</code> environment variable to true</p>
+</blockquote>
+<h4 id="编译-xproto-报错："><a href="#编译-xproto-报错：" class="headerlink" title="编译 xproto 报错："></a>编译 xproto 报错：</h4><p>config.guess 找不到 mips 相关，需要更新 config.guess config.sub</p>
+<p>下载最新的 config.guess config.sub(根据错误提示 <a href="http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD，http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD)，这里我放在了" target="_blank" rel="noopener">http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD，http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD)，这里我放在了</a> <code>/root</code>下<br>在 <code>builder.rb</code> 的， <code>def build()</code> 中 添加语句</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> software.name</span><br><span class="line">       <span class="keyword">when</span> <span class="string">"xproto"</span></span><br><span class="line">         <span class="string">`cp -f /root/config.guess /var/cache/omnibus/src/xproto/xproto-7.0.25/`</span></span><br><span class="line">         <span class="string">`cp -f /root/config.sub /var/cache/omnibus/src/xproto/xproto-7.0.25/`</span></span><br><span class="line">       <span class="keyword">when</span> <span class="string">"makedepend"</span></span><br><span class="line">         <span class="string">`cp -f /root/config.guess /var/cache/omnibus/src/makedepend/makedepend-1.0.5/`</span></span><br><span class="line">         <span class="string">`cp -f /root/config.sub /var/cache/omnibus/src/makedepend/makedepend-1.0.5/`</span></span><br><span class="line">       <span class="keyword">when</span> <span class="string">"curl"</span></span><br><span class="line">         <span class="string">`cp -f /root/config.guess /var/cache/omnibus/src/curl/`</span></span><br><span class="line">         <span class="string">`cp -f /root/config.sub /var/cache/omnibus/src/curl/`</span></span><br><span class="line">       <span class="keyword">when</span> <span class="string">"ncurses"</span></span><br><span class="line">         <span class="string">`cp -f /root/config.guess /var/cache/omnibus/src/ncurses/ncurses-5.9/`</span></span><br><span class="line">         <span class="string">`cp -f /root/config.sub /var/cache/omnibus/src/ncurses/ncurses-5.9/`</span></span><br><span class="line">       <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>如果在编译过程中遇到类似错误，均可在此处继续添加</p>
+<h3 id="openssl-编译错误"><a href="#openssl-编译错误" class="headerlink" title="openssl 编译错误"></a>openssl 编译错误</h3><p>在 builder.rb 的 def shellout(),添加</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> software.name</span><br><span class="line">      <span class="keyword">when</span> <span class="string">"openssl"</span></span><br><span class="line">        command_string = command_string.gsub(<span class="regexp">/.\/config --prefix=\/opt\/gitlab\/embedded/</span>,<span class="string">"./Configure linux64-mips64 --prefix=/opt/gitlab/embedded"</span>)</span><br><span class="line">        puts command_string</span><br><span class="line">        puts <span class="string">"#####################################################"</span></span><br><span class="line">      <span class="keyword">when</span> <span class="string">"libiconv"</span></span><br><span class="line">        command_string = command_string.gsub(<span class="regexp">/gmake -j 9/</span>,<span class="string">"make"</span>)</span><br><span class="line">        puts command_string</span><br><span class="line">        puts <span class="string">"#####################################################"</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="license-finder-错误"><a href="#license-finder-错误" class="headerlink" title="license finder 错误"></a>license finder 错误</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/root/omnibus-gitlab/.bundle/ruby/2.5.0/gems/mixlib-shellout-2.3.2/lib/mixlib/shellout/unix.rb:340:<span class="keyword">in</span> `<span class="built_in">exec</span><span class="string">': No such file or directory - license_finder (Errno::ENOENT)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">sh-4.3# gem install license_finder</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="go-报错"><a href="#go-报错" class="headerlink" title="go 报错"></a>go 报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">The following shell command exited with status 2:</span><br><span class="line"></span><br><span class="line">    $ GOPATH=/var/cache/omnibus/src/go-crond go get github.com/golang/dep</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"></span><br><span class="line">    (nothing)</span><br><span class="line"></span><br><span class="line">Error:</span><br><span class="line"></span><br><span class="line">    # github.com/golang/dep/vendor/github.com/boltdb/bolt</span><br><span class="line">../../golang/dep/vendor/github.com/boltdb/bolt/db.go:101:13: undefined: maxMapSize</span><br></pre></td></tr></table></figure>
+
+<p>好像是 go dep 不支持此种架构，直接找到 这个 go-crond 的编译程序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">./omnibus-gitlab/config/software/go-crond.rb</span><br><span class="line"></span><br><span class="line">修改</span><br><span class="line"> # 由于 go get 报错，因此注释掉，手动编译</span><br><span class="line"> - command &apos;go get github.com/golang/dep&apos;, env: env</span><br><span class="line"> - command &apos;go install github.com/golang/dep/cmd/dep&apos;, env: env</span><br><span class="line"></span><br><span class="line"> - command &quot;../../../../bin/dep ensure&quot;, env: env</span><br><span class="line"> + command &quot;/bin/dep ensure&quot;, env: env</span><br></pre></td></tr></table></figure>
+
+<p>按照里面的步骤</p>
+<ol>
+<li>设置 GOPATH=//var/cache/omnibus/src/go-crond</li>
+<li><code>go get github.com/jessevdk/go-flags</code></li>
+<li><code>go get github.com/robfig/cron</code></li>
+<li><code>go build</code></li>
+<li><code>cp go-crond</code></li>
+</ol>
+<h4 id="prometheus-编译错误"><a href="#prometheus-编译错误" class="headerlink" title="prometheus 编译错误"></a>prometheus 编译错误</h4><p>暂时直接copy 编译好的 prometheus 到 <code>/opt/gitlab/embedded/bin/</code></p>
+<p>此处没有找到好的办法，可以选择暂时跳过，或者提升系统中 go 的版本</p>
+<h4 id="编译-gitlab-rails-报错"><a href="#编译-gitlab-rails-报错" class="headerlink" title="编译 gitlab-rails 报错"></a>编译 gitlab-rails 报错</h4><p>bundle install错误，<code>gem install rbtrace</code> 失败，还是由于 config.guess config.sub 文件过旧导致。<br>找到 <code>rbtrace</code>所在目录 <code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/rbtrace-0.4.11/ext</code>,修改 <code>extconf.rd</code>，插入以下命令</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">`cp -f /root/config.guess /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/rbtrace-0.4.11/ext/src/msgpack-1.1.0/ac`</span></span><br><span class="line"><span class="string">`cp -f /root/config.sub /opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/rbtrace-0.4.11/ext/src/msgpack-1.1.0/ac`</span></span><br></pre></td></tr></table></figure>
+
+<p>发现以上方法无效</p>
+<p>观察发现： <code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/</code> 目录每次都会清楚下载的包，因此把下载好的gem 和 文件（<code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/</code> 下的 <code>gems</code> <code>cache</code>）打包保存</p>
+<blockquote>
+<p>注意不要放在 <code>/opt/gitlab/embedded</code> 下<br>然后在 <code>gitlab-rails</code> 安装脚本中（<code>omnibus-gitlab/config/software/gitlab-rails.rb</code>）加入</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 在 bundle install 之前加入， 我把tar包放在了 `/root/zhaobq/`下</span><br><span class="line">command &quot;tar -xvf /root/zhaobq/gems.tar -C /opt/gitlab/embedded/lib/ruby/gems/2.6.0&quot;</span><br><span class="line">command &quot;tar -xvf /root/zhaobq/cache.tar -C /opt/gitlab/embedded/lib/ruby/gems/2.6.0&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong>这里要替换掉 <code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/rbtrace-0.4.11/ext/src/msgpack-1.1.0/ac/config.guess &amp; config.sub</code></p>
+<p><code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/rbtrace-0.4.11/ext</code>,修改 <code>extconf.rd</code>，注释掉<code>sys(&quot;tar zxvfo #{msgpack}&quot;)</code> 防止重新解压缩覆盖掉 config.guess config.sub</p>
+<p>发现以上方法无效</p>
+<p>解决方法：<br>编写死循环脚本，当检测到目录存在时，就拷贝指定文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line">dir=<span class="variable">$1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> [ ! -d <span class="string">"<span class="variable">$&#123;dir&#125;</span>"</span> ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">sleep 0.0001</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">cp -f /root/zhaobq/config.guess <span class="variable">$&#123;dir&#125;</span>/</span><br><span class="line">cp -f /root/zhaobq/config.sub <span class="variable">$&#123;dir&#125;</span>/</span><br></pre></td></tr></table></figure>
+
+<p>把执行脚本的方法，写入在 <code>config/software/gitlab-rails.rb</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">command &apos; sh xxx/xxx.sh &#123;args&#125; &amp;&apos;</span><br></pre></td></tr></table></figure>
+
+<p>找到 gitlab-rails 源码所在目录 <code>/var/cache/omnibus/src/gitlab-rails</code></p>
+<h4 id="redis-编译报错"><a href="#redis-编译报错" class="headerlink" title="redis 编译报错"></a>redis 编译报错</h4><p>编辑 config/software/redis.rb</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make &apos;-j xxx  MALLOC=libc&apos;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="缺少-yarn"><a href="#缺少-yarn" class="headerlink" title="缺少 yarn"></a>缺少 yarn</h4><p>安装<a href="https://yarn.bootcss.com/docs/install/#centos-stable" target="_blank" rel="noopener">指南</a></p>
+<hr>
+<h4 id="go-编译报错"><a href="#go-编译报错" class="headerlink" title="go 编译报错"></a>go 编译报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">The following shell command exited with status 2:</span><br><span class="line"></span><br><span class="line">    $ GOPATH=/var/cache/omnibus/src/go-crond go get github.com/golang/dep</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"></span><br><span class="line">    (nothing)</span><br><span class="line"></span><br><span class="line">Error:</span><br><span class="line"></span><br><span class="line">    # github.com/golang/dep/vendor/github.com/boltdb/bolt</span><br><span class="line">../../golang/dep/vendor/github.com/boltdb/bolt/db.go:101:13: undefined: maxMapSize</span><br></pre></td></tr></table></figure>
+
+<p>好像是 <code>bolt</code> 缺少变量</p>
+<p>进入 <code>/var/cache/omnibus/src/go-crond/src/github.com/golang/dep/vendor/github.com/boltdb/bolt</code></p>
+<p>执行 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp bolt_amd64.go bolt_mips64el.go</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">The following shell command exited with status 2:</span><br><span class="line"></span><br><span class="line">    $ GOPATH=/var/cache/omnibus/src/prometheus go build -ldflags &apos;-X github.com/prometheus/prometheus/vendor/github.com/prometheus/common/version.Version=1.8.2 -X github.com/prometheus/prometheus/vendor/github.com/prometheus/common/version.Branch=master -X github.com/prometheus/prometheus/vendor/github.com/prometheus/common/version.BuildUser=GitLab-Omnibus&apos; ./cmd/prometheus</span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line"></span><br><span class="line">    (nothing)</span><br><span class="line"></span><br><span class="line">Error:</span><br><span class="line"></span><br><span class="line">    # github.com/prometheus/prometheus/vendor/gopkg.in/fsnotify.v1</span><br><span class="line">vendor/gopkg.in/fsnotify.v1/inotify.go:39:15: undefined: unix.InotifyInit</span><br></pre></td></tr></table></figure>
+
+<p>由于在 golang.org/x/sys/unix/ 下的 有关 mips64el 的系统调用中，没有 InotifyInit() 函数，只有 InotifyInit1(args int) 函数，因此做一个替换。</p>
+<p>解决方案：<br>在 <code>config/software/prometheus.rb</code> <code>go build</code>之前，添加下面的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">command &apos;sed -i &quot;s/unix.InotifyInit()/unix.InotifyInit1(0)/g&quot;  /var/cache/omnibus/src/prometheus/src/github.com/prometheus/prometheus/vendor/gopkg.in/fsnotify.v1/inotify.go&apos;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="node-版本过低"><a href="#node-版本过低" class="headerlink" title="node 版本过低"></a>node 版本过低</h4><p>升级node<br>下载node 源码， git 的 tag 作为node版本</p>
+<h2 id="gitlab-安装"><a href="#gitlab-安装" class="headerlink" title="gitlab 安装"></a>gitlab 安装</h2><p>以 <code>loongnix-base</code> 作为基础镜像，启动<code>container</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name gitlab-loongnix --privileged docker.io/loongnix/loongnix-base /usr/sbin/init</span><br></pre></td></tr></table></figure>
+
+<p>docker cp 到/mnt 目录下， 执行 <code>rpm -ivh xxx.rpm</code></p>
+<h4 id="缺少依赖"><a href="#缺少依赖" class="headerlink" title="缺少依赖"></a>缺少依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">error: Failed dependencies:</span><br><span class="line">	policycoreutils-python is needed by gitlab-ce-11.11.2+rfbranch.20faee93-0.el7.mips64el</span><br></pre></td></tr></table></figure>
+
+<p>执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install policycoreutils-python</span><br></pre></td></tr></table></figure>
+
+<h4 id="gitlab-ctl-缺少-rainbow"><a href="#gitlab-ctl-缺少-rainbow" class="headerlink" title="gitlab-ctl 缺少 rainbow"></a>gitlab-ctl 缺少 rainbow</h4><p>在宿主机 <code>gem install rainbow</code>, 拷贝安装后的文件(<code>/usr/local/lib/ruby/gems/2.6.0/gems/rainbow-3.0.0/rainbow &amp; rainbow.rb</code>) 到<code>/opt/gitlab/embedded/lib/ruby/site_ruby/2.6.0</code></p>
+<h4 id="redis-unable-to-open-supervise-ok-file-does-not-exist"><a href="#redis-unable-to-open-supervise-ok-file-does-not-exist" class="headerlink" title="redis: unable to open supervise/ok: file does not exist"></a>redis: unable to open supervise/ok: file does not exist</h4><p>这是由于程序通过检测 supervices/ok 文件，来确定 redis 服务是否正常。实际情况是 <code>gitlab-ctl reconfigure</code> 卡在了 redis 服务的创建过程中，具体执行文件为：<code>/opt/gitlab/embedded/lib/ruby/gems/2.6.0/gems/omnibus-ctl-0.6.0/lib/omnibus-ctl.rb</code></p>
+<p>需要在后台执行 <code>/opt/gitlab/embedded/bin/runsvdir-start</code></p>
+<h3 id="默认用户名密码"><a href="#默认用户名密码" class="headerlink" title="默认用户名密码"></a>默认用户名密码</h3><p>Username: root<br>Password: 5iveL!fe</p>
+<h3 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT</span><br><span class="line">/etc/init.d/iptables save</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/软件编译记录/">软件编译记录</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/devops/">devops</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/k8s-learning-1.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          k8s 学习笔记（一）容器
+        
+      </div>
+    </a>
+  
+  
+    <a href="/omnibus-gitlab-for-arm64-编译记录.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">omnibus-gitlab-for-arm64-编译记录</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#编译为二进制"><span class="nav-number">1.</span> <span class="nav-text">编译为二进制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设置环境变量-ALTERNATIVE-SOURCES-true"><span class="nav-number">1.1.</span> <span class="nav-text">设置环境变量 ALTERNATIVE_SOURCES=true</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置环境变量COMPILE-ASSETS"><span class="nav-number">1.2.</span> <span class="nav-text">设置环境变量COMPILE_ASSETS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编译-xproto-报错："><span class="nav-number">1.2.1.</span> <span class="nav-text">编译 xproto 报错：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#openssl-编译错误"><span class="nav-number">1.3.</span> <span class="nav-text">openssl 编译错误</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#license-finder-错误"><span class="nav-number">1.3.1.</span> <span class="nav-text">license finder 错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#go-报错"><span class="nav-number">1.3.2.</span> <span class="nav-text">go 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#prometheus-编译错误"><span class="nav-number">1.3.3.</span> <span class="nav-text">prometheus 编译错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编译-gitlab-rails-报错"><span class="nav-number">1.3.4.</span> <span class="nav-text">编译 gitlab-rails 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-编译报错"><span class="nav-number">1.3.5.</span> <span class="nav-text">redis 编译报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缺少-yarn"><span class="nav-number">1.3.6.</span> <span class="nav-text">缺少 yarn</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#go-编译报错"><span class="nav-number">1.3.7.</span> <span class="nav-text">go 编译报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#node-版本过低"><span class="nav-number">1.3.8.</span> <span class="nav-text">node 版本过低</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gitlab-安装"><span class="nav-number">2.</span> <span class="nav-text">gitlab 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#缺少依赖"><span class="nav-number">2.0.1.</span> <span class="nav-text">缺少依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gitlab-ctl-缺少-rainbow"><span class="nav-number">2.0.2.</span> <span class="nav-text">gitlab-ctl 缺少 rainbow</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-unable-to-open-supervise-ok-file-does-not-exist"><span class="nav-number">2.0.3.</span> <span class="nav-text">redis: unable to open supervise/ok: file does not exist</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#默认用户名密码"><span class="nav-number">2.1.</span> <span class="nav-text">默认用户名密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防火墙"><span class="nav-number">2.2.</span> <span class="nav-text">防火墙</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

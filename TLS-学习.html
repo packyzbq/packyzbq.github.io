@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>mtls-学习 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="网络">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
+<meta name="keywords" content="网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MTLS-学习">
+<meta property="og:url" content="http://packyzbq.github.io/TLS-学习.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/tls-head.png">
+<meta property="og:updated_time" content="2019-10-17T10:49:54.852Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MTLS-学习">
+<meta name="twitter:description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/tls-head.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-TLS-学习" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/tls-head.png" rel="gallery_ck6hnf6yc000zs8ul5tgv8n1r">
+        <img src="/gallery/tls-head.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      MTLS-学习
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/TLS-学习.html" class="article-date">
+	  <time datetime="2019-09-20T07:09:16.000Z" itemprop="datePublished">September 20, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- ![head](TLS-学习/head.png) -->
+
+<p>TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。</p>
+<a id="more"></a>
+
+<p>一般情况下，客户端只会验证服务端ca来确保 HTTPS/TLS 服务是安全的。即保证数据在传输过程中是加密的完整的。使用MTLS，只有当客户端拥有ca机构颁发的证书，或在客户端ca中提供额外的安全检测，服务器才能接受连接。</p>
+<p>我们先来看下 TLS 的认证过程</p>
+<h2 id="TLS-认证"><a href="#TLS-认证" class="headerlink" title="TLS 认证"></a>TLS 认证</h2><p>TLS 是基于传输层实现的，因此会基于 TCP 三次握手添加特性，再TCP 三次握手建立连接之后，会发生如下图的握手阶段</p>
+<!-- ![handshake](TLS-学习/handshake.png) -->
+<img src="/TLS-学习/handshake.png">
+
+<ul>
+<li>步骤 1. ClientHello – 客户端发送所支持的 SSL/TLS 最高协议版本号和所支持的加密算法集合及压缩方法集合等信息给服务器端。</li>
+<li>步骤 2. ServerHello – 服务器端收到客户端信息后，选定双方都能够支持的 SSL/TLS 协议版本和加密方法及压缩方法，返回给客户端。</li>
+<li>（可选）步骤 3. SendCertificate – 服务器端发送服务端证书给客户端。</li>
+<li>（可选）步骤 4. RequestCertificate – 如果选择双向验证，服务器端向客户端请求客户端证书。</li>
+<li>步骤 5. ServerHelloDone – 服务器端通知客户端初始协商结束。</li>
+<li>（可选）步骤 6. ResponseCertificate – 如果选择双向验证，客户端向服务器端发送客户端证书。</li>
+<li>步骤 7. ClientKeyExchange – 客户端使用服务器端的公钥，对客户端公钥和密钥种子进行加密，再发送给服务器端。</li>
+<li>（可选）步骤 8. CertificateVerify – 如果选择双向验证，客户端用本地私钥生成数字签名，并发送给服务器端，让其通过收到的客户端公钥进行身份验证。</li>
+<li>步骤 9. CreateSecretKey – 通讯双方基于密钥种子等信息生成通讯密钥。</li>
+<li>步骤 10. ChangeCipherSpec – 客户端通知服务器端已将通讯方式切换到加密模式。</li>
+<li>步骤 11. Finished – 客户端做好加密通讯的准备。</li>
+<li>步骤 12. ChangeCipherSpec – 服务器端通知客户端已将通讯方式切换到加密模式。</li>
+<li>步骤 13. Finished – 服务器做好加密通讯的准备。</li>
+<li>步骤 14. Encrypted/DecryptedData – 双方使用客户端密钥，通过对称加密算法对通讯内容进行加密。</li>
+<li>步骤 15. ClosedConnection – 通讯结束后，任何一方发出断开 SSL 连接的消息。</li>
+</ul>
+<p>其中，可选步骤为 MTLS 所需要的步骤。</p>
+<h2 id="MTLS-实验"><a href="#MTLS-实验" class="headerlink" title="MTLS 实验"></a>MTLS 实验</h2><ul>
+<li>客户端 &amp; 服务端 ca证书</li>
+</ul>
+<p>在实验过程中，可以使用 <a href="https://github.com/nicholasjackson/mtls-go-example" target="_blank" rel="noopener">mtls-go-example</a> 工具生成一系列所需要的证书，包括：</p>
+<ul>
+<li>根证书 &amp; key</li>
+<li>中间ca（充当 ca）</li>
+<li>应用证书</li>
+<li>客户端证书</li>
+</ul>
+<blockquote>
+<p>关于证书的签发，可以参考文章 <a href="https://xz.aliyun.com/t/2530" target="_blank" rel="noopener">SSL/TLS协议详解(中)——证书颁发机构</a></p>
+</blockquote>
+<p>应用ca 和 客户端ca 都是通过中间链生成，这将允许客户端验证使用中间链的任何服务器。通过使用应用程序证书而不是中间人对客户端证书进行签名，可以将客户端证书锁定到特定应用程序。</p>
+<p>执行 <code>./generate.sh example.com &lt;password&gt;</code></p>
+<p>将会生成</p>
+<ul>
+<li>1_root 根证书</li>
+<li>2_intermediate： 信任中间链</li>
+<li>3_application： 应用/服务相关的 key 和 ca证书</li>
+<li>4_client</li>
+</ul>
+<p>在 istio 中测试：</p>
+<p>#TODO</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络/">网络</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/docker-相关问题.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          docker 运维
+        
+      </div>
+    </a>
+  
+  
+    <a href="/istio-服务异常处理.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">istio-服务异常处理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TLS-认证"><span class="nav-number">1.</span> <span class="nav-text">TLS 认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MTLS-实验"><span class="nav-number">2.</span> <span class="nav-text">MTLS 实验</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>k8s、cri 与 container | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="K8scontainer">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
+<meta name="keywords" content="K8s,container">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s、CRI 与 container">
+<meta property="og:url" content="http://packyzbq.github.io/K8s-cri-container.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+<meta property="og:updated_time" content="2020-01-21T03:05:01.946Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="K8s、CRI 与 container">
+<meta name="twitter:description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-K8s-cri-container" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6hnf6y0000gs8ulznuiaqnz">
+        <img src="/gallery/k8s-header.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      K8s、CRI 与 container
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/K8s-cri-container.html" class="article-date">
+	  <time datetime="2020-01-14T09:20:49.000Z" itemprop="datePublished">January 14, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。</p>
+<a id="more"></a>
+
+<h2 id="K8s-如何工作"><a href="#K8s-如何工作" class="headerlink" title="K8s 如何工作"></a>K8s 如何工作</h2><p>在 K8s 中，存在一个控制面板，也就是我们所说的 master node， 上面运行着 apiserver、controllerManager、kubeScheduler、kubedns 等组件。当我们想要创建一个应用（deployment、statefulset）时，主要流程如下：</p>
+<img src="/K8s-cri-container/k8s-seq.png">
+<ol>
+<li>通过 kubectl 命令向 apiserver 提交， apiserver 将资源保存在 etcd 中</li>
+<li>controllermanager 通过控制循环，获取新创建的资源，并创建 pod 信息。<strong>注意这里只创建pod，并未调度和创建容器</strong></li>
+<li>kube-scheduler 也会循环获取新创建但未调度的pod，并在执行一系列调度算法后，将 pod 绑定到一个 node上，并更新 etcd 中的信息。具体方式是在 pod 的 spec 中加入 <code>nodeName</code> 字段。</li>
+<li>Kubelet监视所有Pod对象的更改。当发现Pod已绑定到Node，并且绑定的Node本身时，Kubelet会接管所有后续任务，包括创建 pod 网络，container等。</li>
+<li>kubelet 会通过 CRI 调用 container runtime 创建 pod 中的 container。</li>
+</ol>
+<p>下图中 containerd 作为 high-level runtime，并调用 runC 创建 namespace 隔离和 cgroup 资源限制。</p>
+<img src="/K8s-cri-container/kubelet-containerd.png">
+
+<h2 id="Container-Runtime-Interface-CRI"><a href="#Container-Runtime-Interface-CRI" class="headerlink" title="Container Runtime Interface (CRI)"></a>Container Runtime Interface (CRI)</h2><p>CRI 在 Kubernetes 1.5 中引入，并充当 kubelet 和容器运行时之间的桥梁。 期望与Kubernetes集成的高级容器运行时将实现CRI。预期runtimes将负责镜像的管理，并支持Kubernetes pods，以及管理各个容器。CRI仅具有一个功能：对于Kubernetes，它描述了容器应具有的操作以及每个操作应具有的参数。</p>
+<blockquote>
+<p>CRI 是以容器为中心的API，设计 CRI 的初衷是不希望向容器（比如 docker）暴露 pod 信息或 pod 的api，Pod始终是Kubernetes编排概念，与容器无关，因此这就是为什么必须使该API以容器为中心。</p>
+</blockquote>
+<p>CRI 工作在 kubelet 与 container runtime之间，目前常见的 runtime 有：</p>
+<ul>
+<li>docker: 目前 docker 已经将一部分功能移至 containerd 中，CRI 可以直接与 containerd 交互。 因此，Docker本身并不需要支持CRI(containerd已经支持)。</li>
+<li>containerd：containerd 可以通过 shim 对接不同 low-level runtime，这部分后文会详细介绍</li>
+<li>cri-o：一种轻量级的 runtime，支持runc和Clear Containers作为low-level runtimes。</li>
+</ul>
+<h3 id="CRI-是如何工作的"><a href="#CRI-是如何工作的" class="headerlink" title="CRI 是如何工作的"></a>CRI 是如何工作的</h3><p>CRI 大体包含三部分接口：Sandbox 、 Container 和 Image，其中提供了一些操作容器的通用接口，包括 Create Delete List 等。</p>
+<p>Sandbox 为 Container 提供一定的运行环境，这其中包括 pod 的网络等。 Container 包括容器生命周期的具体操作，Image 则提供对镜像的操作。</p>
+<p>kubelet会通过 grpc 调用 CRI 接口，首先去创建一个环境，也就是所谓的 PodSandbox。当 PodSandbox 可用后，继续调用 Image 或 Container 接口去拉取镜像和创建容器。其中，shim 会将这些请求翻译为具体的 runtime API，并执行不同 low-level runtime 的具体操作。</p>
+<img src="/K8s-cri-container/CRI-working.png">
+
+
+<h4 id="PodSandbox"><a href="#PodSandbox" class="headerlink" title="PodSandbox"></a>PodSandbox</h4><p>上文所说的 Sandbox 到底是什么东西呢？ 我们从虚拟机和容器化两方面来看，这两者都使用 cgroups 做资源配额，而且概念上都抽离出一个隔离的运行时环境，只是区别在于资源隔离的实现。因此 Sandbox 是 K8s 为兼容不同运行时环境预留的空间，也就是说 K8s 允许 low-level runtime 依据不同的是实现去创建不同的 PodSandbox，对于 kata 来说 PodSandbox 就是虚拟机，对于 docker 来说就是 Linux namespace。当 Pod Sandbox 建立起来后，Kubelet 就可以在里面创建用户容器。当到删除 Pod 时，Kubelet 会先移除 Pod Sandbox 然后再停止里面的所有容器，对 container 来说，当 Sandbox 运行后，只需要将新的 container 的 namespace 加入到已有的 sandbox 的 namespace中。</p>
+<p>在默认情况下， CRI 体系里，Pod Sandbox 其实就是 pause 容器。Kubelet 代码引用的 <code>defaultSandboxImage</code> 其实就是官方提供的 gcr.io/google_containers/pause-amd64 镜像。</p>
+<h3 id="shim-v2"><a href="#shim-v2" class="headerlink" title="shim v2"></a>shim v2</h3><p>现在由于多种不同的 low-level runtime 的发展，比如 kata container 和 gVisor，其 shim 的实现方式均不同，需要在 CRI shim 与 low-level runtime 之间增加一层。 以 kata container 为例，依照上文 PodSandbox 所说，由于底层的 low-level runtime 不同，CRI shim 并不能直接用于操作 kata container。目前，kata container 所作的是提供一套 kata shim，可以将 CRI shim 的操作转换为对 kata 的操作。</p>
+<img src="/K8s-cri-container/kata-shim-v1.png">
+
+<p>这么做的问题很明显，每个容器启动时，都需要 shim 做填充，而加入 kata shim 后需要将 shim 操作与 CRI 一一匹配，这会导致严重的性能损失。最终其实并不希望每个容器都匹配一个 shim，但是 sandbox 会匹配一个shim。此外这种方式对于其他 CRI 开发者不利。</p>
+<p>Shim v2 希望在 containerd -&gt; OCI runtime 中增加一层，提供各种运行时都可以实现的API，以在容器化的同时添加支持仍然可以控制状态和抽象动作。具体的proposal 见 issue：<a href="https://github.com/containerd/containerd/issues/2426" target="_blank" rel="noopener">https://github.com/containerd/containerd/issues/2426</a></p>
+<p>使用 shim v2 可以为每个 pod 指定一个 shim，当在创建的沙箱中调用<code>start</code>时，即启动了一个shim。但是，当下次调用该API时，即上一个CRI中的Container API，将不再启动一个shim。也就是说，一个 pod 只会启动一个shim，接管这个 pod 中所有 container 的 shim 操作。</p>
+<p>还是以 kata 为例，当替换为 shim v2 之后，其调用如图：</p>
+<img src="/K8s-cri-container/kata-shim-v2.png">
+
+<p>当执行<code>create</code>和<code>start</code>操作时，所有这些操作都映射在 Shimv2 的具体实现上，而不必考虑如何映射和实现CRI。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/container/">container</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/Kubeweekly.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CNCF 生态周报 2020-01-21
+        
+      </div>
+    </a>
+  
+  
+    <a href="/深入理解container.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">深入理解container--容器运行时</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#K8s-如何工作"><span class="nav-number">1.</span> <span class="nav-text">K8s 如何工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-Runtime-Interface-CRI"><span class="nav-number">2.</span> <span class="nav-text">Container Runtime Interface (CRI)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CRI-是如何工作的"><span class="nav-number">2.1.</span> <span class="nav-text">CRI 是如何工作的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PodSandbox"><span class="nav-number">2.1.1.</span> <span class="nav-text">PodSandbox</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shim-v2"><span class="nav-number">2.2.</span> <span class="nav-text">shim v2</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>gc-log 常用参数 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="javagc">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="12345678-XX:+PrintHeapAtGC -verbose:gc -XX:+PrintTenuringDistribution-XX:+PrintGCDateStamps -XX:+PrintGCDetails-XX:+PrintReferenceGC -XX:+PrintGCTimeStamps-XX:+PrintGC">
+<meta name="keywords" content="java,gc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gc-log 常用参数">
+<meta property="og:url" content="http://packyzbq.github.io/gc-log.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="12345678-XX:+PrintHeapAtGC -verbose:gc -XX:+PrintTenuringDistribution-XX:+PrintGCDateStamps -XX:+PrintGCDetails-XX:+PrintReferenceGC -XX:+PrintGCTimeStamps-XX:+PrintGC">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-10-24T06:46:45.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gc-log 常用参数">
+<meta name="twitter:description" content="12345678-XX:+PrintHeapAtGC -verbose:gc -XX:+PrintTenuringDistribution-XX:+PrintGCDateStamps -XX:+PrintGCDetails-XX:+PrintReferenceGC -XX:+PrintGCTimeStamps-XX:+PrintGC">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-gc-log" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      gc-log 常用参数
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/gc-log.html" class="article-date">
+	  <time datetime="2019-10-24T06:16:51.000Z" itemprop="datePublished">October 24, 2019</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintHeapAtGC </span><br><span class="line">-verbose:gc </span><br><span class="line">-XX:+PrintTenuringDistribution</span><br><span class="line">-XX:+PrintGCDateStamps </span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintReferenceGC </span><br><span class="line">-XX:+PrintGCTimeStamps</span><br><span class="line">-XX:+PrintGC</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+<h2 id="XX-PrintHeapAtGC"><a href="#XX-PrintHeapAtGC" class="headerlink" title="-XX:+PrintHeapAtGC"></a>-XX:+PrintHeapAtGC</h2><p>每次gc(yonggc,fullgc) 都会输出gc前后堆信息</p>
+<p>CMS 中的log</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=1 (full 0):</span><br><span class="line"> par new generation   total 46080K, used 42256K [0x00000007b3800000, 0x00000007b6a00000, 0x00000007b6a00000)</span><br><span class="line">  eden space 40960K,  99% used [0x00000007b3800000, 0x00000007b5fc6ae0, 0x00000007b6000000)</span><br><span class="line">  from space 5120K,  29% used [0x00000007b6500000, 0x00000007b667d750, 0x00000007b6a00000)</span><br><span class="line">  to   space 5120K,   0% used [0x00000007b6000000, 0x00000007b6000000, 0x00000007b6500000)</span><br><span class="line"> concurrent mark-sweep generation total 153600K, used 0K [0x00000007b6a00000, 0x00000007c0000000, 0x00000007c0000000)</span><br><span class="line"> Metaspace       used 3288K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 362K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">2018-08-03T17:40:09.703-0800: [GC (Allocation Failure) 2018-08-03T17:40:09.703-0800: [ParNew</span><br><span class="line">Desired survivor size 3145728 bytes, new threshold 3 (max 3)</span><br><span class="line">- age   2:    1492936 bytes,    1492936 total</span><br><span class="line">: 42256K-&gt;1686K(46080K), 0.0013712 secs] 42256K-&gt;1686K(199680K), 0.0014078 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] </span><br><span class="line">Heap after GC invocations=2 (full 0):</span><br><span class="line"> par new generation   total 46080K, used 1686K [0x00000007b3800000, 0x00000007b6a00000, 0x00000007b6a00000)</span><br><span class="line">  eden space 40960K,   0% used [0x00000007b3800000, 0x00000007b3800000, 0x00000007b6000000)</span><br><span class="line">  from space 5120K,  32% used [0x00000007b6000000, 0x00000007b61a5b18, 0x00000007b6500000)</span><br><span class="line">  to   space 5120K,   0% used [0x00000007b6500000, 0x00000007b6500000, 0x00000007b6a00000)</span><br><span class="line"> concurrent mark-sweep generation total 153600K, used 0K [0x00000007b6a00000, 0x00000007c0000000, 0x00000007c0000000)</span><br><span class="line"> Metaspace       used 3288K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 362K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="verbose-gc"><a href="#verbose-gc" class="headerlink" title="-verbose:gc"></a>-verbose:gc</h2><p>每次gc(yonggc,fullgc) 输出前后结果信息<br>CMS 中的log</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[GC (Allocation Failure)  37929K-&gt;1720K(198656K), 0.0015626 secs]</span><br><span class="line">[GC (Allocation Failure)  40362K-&gt;1576K(198656K), 0.0018508 secs]</span><br></pre></td></tr></table></figure>
+
+<h2 id="XX-PrintTenuringDistribution"><a href="#XX-PrintTenuringDistribution" class="headerlink" title="-XX:+PrintTenuringDistribution"></a>-XX:+PrintTenuringDistribution</h2><p>CMS 中的log</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Desired survivor size 3145728 bytes, new threshold 3 (max 3)</span><br><span class="line">- age   1:    1528520 bytes,    1528520 total</span><br><span class="line"></span><br><span class="line">Desired survivor size 3145728 bytes, new threshold 3 (max 3)</span><br><span class="line">- age   2:    1493000 bytes,    1493000 total</span><br></pre></td></tr></table></figure>
+
+<h2 id="XX-PrintGCDetails"><a href="#XX-PrintGCDetails" class="headerlink" title="-XX:+PrintGCDetails"></a>-XX:+PrintGCDetails</h2><p>打印 gc 的详细信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[GC (Allocation Failure) [ParNew: 40141K-&gt;1529K(46080K), 0.0016821 secs] 40141K-&gt;1529K(199680K), 0.0017271 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] </span><br><span class="line">[GC (Allocation Failure) [ParNew: 42260K-&gt;1618K(46080K), 0.0015961 secs] 42260K-&gt;1618K(199680K), 0.0016258 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] </span><br><span class="line">[GC (Allocation Failure) [ParNew: 42145K-&gt;1637K(46080K), 0.0013662 secs] 42145K-&gt;1637K(199680K), 0.0014078 secs] [Times: user=0.01 sys=0.01, real=0.00 secs] </span><br><span class="line">[GC (Allocation Failure) [ParNew: 42366K-&gt;0K(46080K), 0.0049625 secs] 42366K-&gt;1502K(199680K), 0.0049983 secs] [Times: user=0.01 sys=0.00, real=0.01 secs]</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>Allocation Failure</code> 是jvm 进行 gc 的原因，内存不足导致创建新对象失败</p>
+<h2 id="XX-PrintGC"><a href="#XX-PrintGC" class="headerlink" title="-XX:+PrintGC"></a>-XX:+PrintGC</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">7.774: [GC (Allocation Failure)  32768K-&gt;17253K(200704K), 0.0833318 secs]</span><br><span class="line">23.877: [GC (Allocation Failure)  50021K-&gt;52439K(200704K), 0.0543904 secs]</span><br><span class="line">40.501: [GC (Allocation Failure)  85207K-&gt;84427K(200704K), 0.0473820 secs]</span><br><span class="line">56.633: [GC (Allocation Failure)  117195K-&gt;116277K(200704K), 0.0425909 secs]</span><br><span class="line">73.247: [GC (Allocation Failure)  149045K-&gt;148270K(200704K), 0.0435195 secs]</span><br><span class="line">73.291: [GC (CMS Initial Mark)  148386K(200704K), 0.0011136 secs]</span><br><span class="line">73.396: [GC (CMS Final Remark)  148767K(200704K), 0.0028249 secs]</span><br><span class="line">75.464: [GC (CMS Initial Mark)  153371K(200704K), 0.0033355 secs]</span><br><span class="line">80.679: [GC (CMS Final Remark)  163165K(200704K), 0.0045811 secs]</span><br><span class="line">82.747: [GC (CMS Initial Mark)  167081K(200704K), 0.0065648 secs]</span><br><span class="line">82.858: [GC (CMS Final Remark)  168061K(200704K), 0.0061034 secs]</span><br><span class="line">84.933: [GC (CMS Initial Mark)  171915K(200704K), 0.0108552 secs]</span><br><span class="line">85.047: [GC (CMS Final Remark)  171915K(200704K), 0.0085279 secs]</span><br><span class="line">87.120: [GC (CMS Initial Mark)  175833K(200704K), 0.0084935 secs]</span><br></pre></td></tr></table></figure>
+
+<p>这个展示的就比较简练了，回收原因、GC 回收阶段、回收效果以及用时一目了然。</p>
+<h2 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h2><p>我一般使用这几个参数进行组合</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintHeapAtGC </span><br><span class="line">-XX:+PrintGCDateStamps </span><br><span class="line">-XX:+PrintGCDetails  </span><br><span class="line">-XX:+PrintReferenceGC </span><br><span class="line">-XX:+PrintTenuringDistribution </span><br><span class="line">-Xloggc: ./gc.log</span><br></pre></td></tr></table></figure>
+
+<p>输出的日志可以使用这个网址(<a href="https://gclogviewer.javaperformancetuning.co.za/#)进行图形化分析。" target="_blank" rel="noopener">https://gclogviewer.javaperformancetuning.co.za/#)进行图形化分析。</a></p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/踩坑之路/">踩坑之路</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gc/">gc</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC80Mjg1MC8xOTM5Nw">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/springboot-es.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Gradle &amp; Springboot 引入ES低版本的问题
+        
+      </div>
+    </a>
+  
+  
+    <a href="/kubectl-startup.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">kubectl 执行步骤拆解</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#XX-PrintHeapAtGC"><span class="nav-number">1.</span> <span class="nav-text">-XX:+PrintHeapAtGC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#verbose-gc"><span class="nav-number">2.</span> <span class="nav-text">-verbose:gc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XX-PrintTenuringDistribution"><span class="nav-number">3.</span> <span class="nav-text">-XX:+PrintTenuringDistribution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XX-PrintGCDetails"><span class="nav-number">4.</span> <span class="nav-text">-XX:+PrintGCDetails</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XX-PrintGC"><span class="nav-number">5.</span> <span class="nav-text">-XX:+PrintGC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合"><span class="nav-number">6.</span> <span class="nav-text">组合</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>
