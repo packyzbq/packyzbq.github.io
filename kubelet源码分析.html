@@ -16,7 +16,7 @@
   <title>kubelet源码分析--启动篇 | packy&#39;s workspace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="keywords" content="K8skubelet">
+  <meta name="keywords" content="kubeletK8s">
   
   
   
@@ -24,7 +24,7 @@
   
   
   <meta name="description" content="在Kubernetes集群中，每个Node节点（又称Minion）上都会启动一个Kubelet服务进行。该进程用于处理Master节点下发到本节点的任务，管理Pod及Pod中的容器。每个Kubelet进程会在API Server上注册节点自身信息，定期向Master节点汇报节点资源的使用情况，并通过cAdvise监控容器和节点资源。">
-<meta name="keywords" content="K8s,kubelet">
+<meta name="keywords" content="kubelet,K8s">
 <meta property="og:type" content="article">
 <meta property="og:title" content="kubelet源码分析--启动篇">
 <meta property="og:url" content="http://packyzbq.github.io/kubelet源码分析.html">
@@ -153,7 +153,7 @@ var themeMenus = {};
 <div class="article-gallery">
   <div class="article-gallery-photos">
     
-      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6j4m39b003s3gulgad4iyc8">
+      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck6sxu6nu004298ul15bfqf6g">
         <img src="/gallery/k8s-header.jpg" itemprop="image">
       </a>
     
@@ -328,8 +328,10 @@ var a = new Donate({
         
   <!-- Gitment START! Deploy by Z4HD -->
 	<div id="comments"></div>
-	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
-	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<!-- <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"> -->
+	<!-- <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script> -->
+	<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+	<script src="https://billts.site/js/gitment.js"></script>
 	<script>
 	var gitment = new Gitment({
 		id: 'http://packyzbq.github.io/kubelet源码分析.html',
