@@ -13,30 +13,31 @@
   <!-- PACE Progress Bar START -->
 
   
-  <title>k8s、cri 与 container | packy&#39;s workspace</title>
+  <title>k8s中 controller &amp; infromer机制 | packy&#39;s workspace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="keywords" content="K8scontainer">
+  <meta name="keywords" content="K8s">
   
   
   
     <meta name="baidu-site-verification" content="G7jlTgf5dD">
   
   
-  <meta name="description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
-<meta name="keywords" content="K8s,container">
+  <meta name="description" content="我们在开发 K8s 应用时，需要去监听某些 pod 或 deployment 等资源的状态。最初可能是调用 Apiserver 的接口去不断的 get Pod 信息，但是由于不断的轮询需求导致 ApiServer 压力增大；后来通过调用 watch 接口，暂时可以达到需求，但其底层仍然是使用的 Informer。因此这次探一下路，看一下 K8s 提供的 informer 机制。">
+<meta name="keywords" content="K8s">
 <meta property="og:type" content="article">
-<meta property="og:title" content="K8s、CRI 与 container">
-<meta property="og:url" content="http://packyzbq.github.io/K8s-cri-container.html">
+<meta property="og:title" content="K8s中 controller &amp; infromer机制">
+<meta property="og:url" content="http://packyzbq.github.io/K8s-controller-infromer.html">
 <meta property="og:site_name" content="packy&#39;s workspace">
-<meta property="og:description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
+<meta property="og:description" content="我们在开发 K8s 应用时，需要去监听某些 pod 或 deployment 等资源的状态。最初可能是调用 Apiserver 的接口去不断的 get Pod 信息，但是由于不断的轮询需求导致 ApiServer 压力增大；后来通过调用 watch 接口，暂时可以达到需求，但其底层仍然是使用的 Informer。因此这次探一下路，看一下 K8s 提供的 informer 机制。">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
-<meta property="og:updated_time" content="2020-01-21T03:05:01.946Z">
+<meta property="og:image" content="http://packyzbq.github.io/K8s-controller-infromer/640.png">
+<meta property="og:image" content="http://packyzbq.github.io/K8s-controller-infromer/informer-flow.png">
+<meta property="og:updated_time" content="2020-02-25T00:50:31.537Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="K8s、CRI 与 container">
-<meta name="twitter:description" content="本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。">
-<meta name="twitter:image" content="http://packyzbq.github.io/gallery/k8s-header.jpg">
+<meta name="twitter:title" content="K8s中 controller &amp; infromer机制">
+<meta name="twitter:description" content="我们在开发 K8s 应用时，需要去监听某些 pod 或 deployment 等资源的状态。最初可能是调用 Apiserver 的接口去不断的 get Pod 信息，但是由于不断的轮询需求导致 ApiServer 压力增大；后来通过调用 watch 接口，暂时可以达到需求，但其底层仍然是使用的 Informer。因此这次探一下路，看一下 K8s 提供的 informer 机制。">
+<meta name="twitter:image" content="http://packyzbq.github.io/K8s-controller-infromer/640.png">
   
     <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
   
@@ -147,25 +148,15 @@ var themeMenus = {};
             
       <div id="content" class="outer">
         
-          <section id="main" style="float:none;"><article id="post-K8s-cri-container" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+          <section id="main" style="float:none;"><article id="post-K8s-controller-infromer" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
   <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
     
-<div class="article-gallery">
-  <div class="article-gallery-photos">
-    
-      <a class="article-gallery-img fancybox" href="/gallery/k8s-header.jpg" rel="gallery_ck70alsqv000p4culnmhyoo3z">
-        <img src="/gallery/k8s-header.jpg" itemprop="image">
-      </a>
-    
-  </div>
-</div>
-
     
       <header class="article-header">
         
   
     <h1 class="thumb" class="article-title" itemprop="name">
-      K8s、CRI 与 container
+      K8s中 controller &amp; infromer机制
     </h1>
   
 
@@ -173,57 +164,49 @@ var themeMenus = {};
     
     <div class="article-meta">
       
-	Posted on <a href="/K8s-cri-container.html" class="article-date">
-	  <time datetime="2020-01-14T09:20:49.000Z" itemprop="datePublished">January 14, 2020</time>
+	Posted on <a href="/K8s-controller-infromer.html" class="article-date">
+	  <time datetime="2020-02-24T10:02:40.000Z" itemprop="datePublished">February 24, 2020</time>
 	</a>
 
       
     </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本篇文章梳理一下 K8s 与 CRI（Container Runtime Interface）、contaier 之间的关系。首先，我们需要知道 K8s 大体的工作流程原理。</p>
+        <p>我们在开发 K8s 应用时，需要去监听某些 pod 或 deployment 等资源的状态。最初可能是调用 Apiserver 的接口去不断的 get Pod 信息，但是由于不断的轮询需求导致 ApiServer 压力增大；后来通过调用 watch 接口，暂时可以达到需求，但其底层仍然是使用的 Informer。因此这次探一下路，看一下 K8s 提供的 informer 机制。</p>
 <a id="more"></a>
 
-<h2 id="K8s-如何工作"><a href="#K8s-如何工作" class="headerlink" title="K8s 如何工作"></a>K8s 如何工作</h2><p>在 K8s 中，存在一个控制面板，也就是我们所说的 master node， 上面运行着 apiserver、controllerManager、kubeScheduler、kubedns 等组件。当我们想要创建一个应用（deployment、statefulset）时，主要流程如下：</p>
-<img src="/K8s-cri-container/k8s-seq.png">
-<ol>
-<li>通过 kubectl 命令向 apiserver 提交， apiserver 将资源保存在 etcd 中</li>
-<li>controllermanager 通过控制循环，获取新创建的资源，并创建 pod 信息。<strong>注意这里只创建pod，并未调度和创建容器</strong></li>
-<li>kube-scheduler 也会循环获取新创建但未调度的pod，并在执行一系列调度算法后，将 pod 绑定到一个 node上，并更新 etcd 中的信息。具体方式是在 pod 的 spec 中加入 <code>nodeName</code> 字段。</li>
-<li>Kubelet监视所有Pod对象的更改。当发现Pod已绑定到Node，并且绑定的Node本身时，Kubelet会接管所有后续任务，包括创建 pod 网络，container等。</li>
-<li>kubelet 会通过 CRI 调用 container runtime 创建 pod 中的 container。</li>
-</ol>
-<p>下图中 containerd 作为 high-level runtime，并调用 runC 创建 namespace 隔离和 cgroup 资源限制。</p>
-<img src="/K8s-cri-container/kubelet-containerd.png">
-
-<h2 id="Container-Runtime-Interface-CRI"><a href="#Container-Runtime-Interface-CRI" class="headerlink" title="Container Runtime Interface (CRI)"></a>Container Runtime Interface (CRI)</h2><p>CRI 在 Kubernetes 1.5 中引入，并充当 kubelet 和容器运行时之间的桥梁。 期望与Kubernetes集成的高级容器运行时将实现CRI。预期runtimes将负责镜像的管理，并支持Kubernetes pods，以及管理各个容器。CRI仅具有一个功能：对于Kubernetes，它描述了容器应具有的操作以及每个操作应具有的参数。</p>
-<blockquote>
-<p>CRI 是以容器为中心的API，设计 CRI 的初衷是不希望向容器（比如 docker）暴露 pod 信息或 pod 的api，Pod始终是Kubernetes编排概念，与容器无关，因此这就是为什么必须使该API以容器为中心。</p>
-</blockquote>
-<p>CRI 工作在 kubelet 与 container runtime之间，目前常见的 runtime 有：</p>
+<h2 id="Informer"><a href="#Informer" class="headerlink" title="Informer"></a>Informer</h2><p>Informer 是 Client-go 中的一个核心工具包。在 Kubernetes 源码中，如果 Kubernetes 的某个组件，需要 List/Get Kubernetes 中的 Object，在绝大多 数情况下，会直接使用 Informer 实例中的 <code>Lister()</code>方法（该方法包含 了 Get 和 List 方法），而很少直接请求 Kubernetes API。Informer 最基本 的功能就是 List/Get Kubernetes 中的 Object。</p>
+<h3 id="Informer-设计思路"><a href="#Informer-设计思路" class="headerlink" title="Informer 设计思路"></a>Informer 设计思路</h3><p>K8s 设计Informer的目的，主要是为了减少 APIServer 的 GET/LIST 调用次数，减少压力，同时也可以更快的返回请求结果。</p>
+<p>当通过 Client-go 发送 List/Get 请求时，Informer 不会去请求 Kubernetes API，而是直接查找缓存在本地内存中的数据(这份数据由 Informer 自己维护)。通过这种方式，Informer 既可以更快地返回结果，又能减少对 Kubernetes API 的直接调用。</p>
+<p>Informer 依赖于 List/Watch API。在初始化时，Informer 会调用 LIST 接口获得资源的全部 Object 并存储在缓存中；然后调用 WATCH 监控 resource，并维护缓存。</p>
+<p>在 Informer 中可以添加自定义的回调函数，当有变更事件发生时去做一些逻辑，</p>
+<h2 id="Informer-架构组件"><a href="#Informer-架构组件" class="headerlink" title="Informer 架构组件"></a>Informer 架构组件</h2><p>Informer 中主要组件有：</p>
 <ul>
-<li>docker: 目前 docker 已经将一部分功能移至 containerd 中，CRI 可以直接与 containerd 交互。 因此，Docker本身并不需要支持CRI(containerd已经支持)。</li>
-<li>containerd：containerd 可以通过 shim 对接不同 low-level runtime，这部分后文会详细介绍</li>
-<li>cri-o：一种轻量级的 runtime，支持runc和Clear Containers作为low-level runtimes。</li>
+<li>Reflector：监控resource变化，并将结果实例化为对象。</li>
+<li>Delta FIFO Queue：存储变化的对象的 FIFO 队列</li>
+<li>Local Store：informer 的 cache，缓存监控resouce的数据，减少对apiserver请求</li>
+<li>WorkQueue：存储变更事件，向controller 提供</li>
 </ul>
-<h3 id="CRI-是如何工作的"><a href="#CRI-是如何工作的" class="headerlink" title="CRI 是如何工作的"></a>CRI 是如何工作的</h3><p>CRI 大体包含三部分接口：Sandbox 、 Container 和 Image，其中提供了一些操作容器的通用接口，包括 Create Delete List 等。</p>
-<p>Sandbox 为 Container 提供一定的运行环境，这其中包括 pod 的网络等。 Container 包括容器生命周期的具体操作，Image 则提供对镜像的操作。</p>
-<p>kubelet会通过 grpc 调用 CRI 接口，首先去创建一个环境，也就是所谓的 PodSandbox。当 PodSandbox 可用后，继续调用 Image 或 Container 接口去拉取镜像和创建容器。其中，shim 会将这些请求翻译为具体的 runtime API，并执行不同 low-level runtime 的具体操作。</p>
-<img src="/K8s-cri-container/CRI-working.png">
+<img src="/K8s-controller-infromer/640.png">
 
+<h2 id="informer-工作流程"><a href="#informer-工作流程" class="headerlink" title="informer 工作流程"></a>informer 工作流程</h2><img src="/K8s-controller-infromer/informer-flow.png">
 
-<h4 id="PodSandbox"><a href="#PodSandbox" class="headerlink" title="PodSandbox"></a>PodSandbox</h4><p>上文所说的 Sandbox 到底是什么东西呢？ 我们从虚拟机和容器化两方面来看，这两者都使用 cgroups 做资源配额，而且概念上都抽离出一个隔离的运行时环境，只是区别在于资源隔离的实现。因此 Sandbox 是 K8s 为兼容不同运行时环境预留的空间，也就是说 K8s 允许 low-level runtime 依据不同的是实现去创建不同的 PodSandbox，对于 kata 来说 PodSandbox 就是虚拟机，对于 docker 来说就是 Linux namespace。当 Pod Sandbox 建立起来后，Kubelet 就可以在里面创建用户容器。当到删除 Pod 时，Kubelet 会先移除 Pod Sandbox 然后再停止里面的所有容器，对 container 来说，当 Sandbox 运行后，只需要将新的 container 的 namespace 加入到已有的 sandbox 的 namespace中。</p>
-<p>在默认情况下， CRI 体系里，Pod Sandbox 其实就是 pause 容器。Kubelet 代码引用的 <code>defaultSandboxImage</code> 其实就是官方提供的 gcr.io/google_containers/pause-amd64 镜像。</p>
-<h3 id="shim-v2"><a href="#shim-v2" class="headerlink" title="shim v2"></a>shim v2</h3><p>现在由于多种不同的 low-level runtime 的发展，比如 kata container 和 gVisor，其 shim 的实现方式均不同，需要在 CRI shim 与 low-level runtime 之间增加一层。 以 kata container 为例，依照上文 PodSandbox 所说，由于底层的 low-level runtime 不同，CRI shim 并不能直接用于操作 kata container。目前，kata container 所作的是提供一套 kata shim，可以将 CRI shim 的操作转换为对 kata 的操作。</p>
-<img src="/K8s-cri-container/kata-shim-v1.png">
+<h2 id="informer-实践"><a href="#informer-实践" class="headerlink" title="informer 实践"></a>informer 实践</h2><p>下面我们就自己编写一个简易的controller调用informer监听资源，首先需要引入包<code>import &quot;k8s.io/client-go/informers&quot;</code></p>
+<p>初始化 kube client，通过读取kubeconfig，建立与kube-apiserver的连接</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">config, err := clientcmd.BuildConfigFromFlags(<span class="string">""</span>, <span class="string">"~/.kube/config"</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err.Error())</span><br><span class="line">    &#125;</span><br><span class="line">    clientset, err := kubernetes.NewForConfig(config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Panic(err.Error())</span><br><span class="line">    &#125;</span><br><span class="line">c := clusterController &#123;</span><br><span class="line">        clientset: clientset,</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<p>这么做的问题很明显，每个容器启动时，都需要 shim 做填充，而加入 kata shim 后需要将 shim 操作与 CRI 一一匹配，这会导致严重的性能损失。最终其实并不希望每个容器都匹配一个 shim，但是 sandbox 会匹配一个shim。此外这种方式对于其他 CRI 开发者不利。</p>
-<p>Shim v2 希望在 containerd -&gt; OCI runtime 中增加一层，提供各种运行时都可以实现的API，以在容器化的同时添加支持仍然可以控制状态和抽象动作。具体的proposal 见 issue：<a href="https://github.com/containerd/containerd/issues/2426" target="_blank" rel="noopener">https://github.com/containerd/containerd/issues/2426</a></p>
-<p>使用 shim v2 可以为每个 pod 指定一个 shim，当在创建的沙箱中调用<code>start</code>时，即启动了一个shim。但是，当下次调用该API时，即上一个CRI中的Container API，将不再启动一个shim。也就是说，一个 pod 只会启动一个shim，接管这个 pod 中所有 container 的 shim 操作。</p>
-<p>还是以 kata 为例，当替换为 shim v2 之后，其调用如图：</p>
-<img src="/K8s-cri-container/kata-shim-v2.png">
+<p>创建<code>shared informer factory</code>， <code>shared informer</code>可以将多个informer的本地存储合并，减少内存使用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">factory := informers.NewSharedInformerFactory(clientset, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">informer := factory.Core().V1().Pods().Informer()</span><br></pre></td></tr></table></figure>
 
-<p>当执行<code>create</code>和<code>start</code>操作时，所有这些操作都映射在 Shimv2 的具体实现上，而不必考虑如何映射和实现CRI。</p>
+<p>创建一个 channel，可以优雅的关闭controller</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stopper := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"><span class="keyword">defer</span> <span class="built_in">close</span>(stopper)</span><br></pre></td></tr></table></figure>
+
+<p>注册回调函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">informer.AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">        AddFunc : onAdd,      <span class="comment">//当一个pod创建时调用</span></span><br><span class="line">        DeleteFunc: onDelete, <span class="comment">//当一个pod删除时调用</span></span><br><span class="line">        UpdateFunc: onUpdate, <span class="comment">//当一个pod更新时调用</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>这里的回调函数是我们自定义的函数，可以简单的打印pod名称</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">onAdd</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="comment">// Cast the obj as node</span></span><br><span class="line">    pod := obj.(*corev1.Pod)</span><br><span class="line">    fmt.Println(pod)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -234,7 +217,7 @@ var themeMenus = {};
 
       
   <span class="ico-tags"></span>
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/container/">container</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li></ul>
 
       
         <div id="donation_div"></div>
@@ -261,7 +244,7 @@ var a = new Donate({
 	<script src="https://billts.site/js/gitment.js"></script>
 	<script>
 	var gitment = new Gitment({
-		id: 'http://packyzbq.github.io/K8s-cri-container.html',
+		id: 'http://packyzbq.github.io/K8s-controller-infromer.html',
 		owner: 'packyzbq',
 		repo: 'gitment',
 		oauth: {
@@ -283,19 +266,10 @@ var a = new Donate({
     
 <nav id="article-nav">
   
-    <a href="/Kubeweekly.html" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          CNCF 生态周报 2020-01-21
-        
-      </div>
-    </a>
   
-  
-    <a href="/深入理解container.html" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/CNCF周报-2-18.html" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">深入理解container--容器运行时</div>
+      <div class="article-nav-title">CNCF周报-2.18</div>
     </a>
   
 </nav>
@@ -309,7 +283,7 @@ var a = new Donate({
     <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
     <strong class="toc-title">Contents</strong>
     
-      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#K8s-如何工作"><span class="nav-number">1.</span> <span class="nav-text">K8s 如何工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-Runtime-Interface-CRI"><span class="nav-number">2.</span> <span class="nav-text">Container Runtime Interface (CRI)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CRI-是如何工作的"><span class="nav-number">2.1.</span> <span class="nav-text">CRI 是如何工作的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PodSandbox"><span class="nav-number">2.1.1.</span> <span class="nav-text">PodSandbox</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shim-v2"><span class="nav-number">2.2.</span> <span class="nav-text">shim v2</span></a></li></ol></li></ol>
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Informer"><span class="nav-number">1.</span> <span class="nav-text">Informer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Informer-设计思路"><span class="nav-number">1.1.</span> <span class="nav-text">Informer 设计思路</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Informer-架构组件"><span class="nav-number">2.</span> <span class="nav-text">Informer 架构组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#informer-工作流程"><span class="nav-number">3.</span> <span class="nav-text">informer 工作流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#informer-实践"><span class="nav-number">4.</span> <span class="nav-text">informer 实践</span></a></li></ol>
     
     </div>
   </aside>

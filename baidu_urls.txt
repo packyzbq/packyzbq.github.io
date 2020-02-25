@@ -1,3 +1,4 @@
+http://packyzbq.github.io/K8s-controller-infromer.html
 http://packyzbq.github.io/CNCF周报-2-18.html
 http://packyzbq.github.io/CNCF周报-2.09.html
 http://packyzbq.github.io/kubelet源码分析.html
@@ -17,4 +18,3 @@ http://packyzbq.github.io/springboot-es.html
 http://packyzbq.github.io/gc-log.html
 http://packyzbq.github.io/kubectl-startup.html
 http://packyzbq.github.io/jaeger-istio.html
-http://packyzbq.github.io/gateway-case.html
