@@ -13,30 +13,27 @@
   <!-- PACE Progress Bar START -->
 
   
-  <title>mtls-学习 | packy&#39;s workspace</title>
+  <title>cncf周报-2-25 | packy&#39;s workspace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="keywords" content="网络">
+  <meta name="keywords" content="KubeWeekly">
   
   
   
     <meta name="baidu-site-verification" content="G7jlTgf5dD">
   
   
-  <meta name="description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
-<meta name="keywords" content="网络">
+  <meta name="keywords" content="KubeWeekly">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MTLS-学习">
-<meta property="og:url" content="http://packyzbq.github.io/TLS-学习.html">
+<meta property="og:title" content="CNCF周报-2-25">
+<meta property="og:url" content="http://packyzbq.github.io/CNCF周报-2-25.html">
 <meta property="og:site_name" content="packy&#39;s workspace">
-<meta property="og:description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://packyzbq.github.io/gallery/tls-head.png">
-<meta property="og:updated_time" content="2019-10-17T10:49:54.852Z">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/kubeweekly.jpg">
+<meta property="og:updated_time" content="2020-02-25T06:43:27.284Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MTLS-学习">
-<meta name="twitter:description" content="TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。">
-<meta name="twitter:image" content="http://packyzbq.github.io/gallery/tls-head.png">
+<meta name="twitter:title" content="CNCF周报-2-25">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/kubeweekly.jpg">
   
     <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
   
@@ -147,25 +144,15 @@ var themeMenus = {};
             
       <div id="content" class="outer">
         
-          <section id="main" style="float:none;"><article id="post-TLS-学习" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+          <section id="main" style="float:none;"><article id="post-CNCF周报-2-25" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
   <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
     
-<div class="article-gallery">
-  <div class="article-gallery-photos">
-    
-      <a class="article-gallery-img fancybox" href="/gallery/tls-head.png" rel="gallery_ck71iy1py002c7guld45zp6qa">
-        <img src="/gallery/tls-head.png" itemprop="image">
-      </a>
-    
-  </div>
-</div>
-
     
       <header class="article-header">
         
   
     <h1 class="thumb" class="article-title" itemprop="name">
-      MTLS-学习
+      CNCF周报-2-25
     </h1>
   
 
@@ -173,78 +160,49 @@ var themeMenus = {};
     
     <div class="article-meta">
       
-	Posted on <a href="/TLS-学习.html" class="article-date">
-	  <time datetime="2019-09-20T07:09:16.000Z" itemprop="datePublished">September 20, 2019</time>
+	Posted on <a href="/CNCF周报-2-25.html" class="article-date">
+	  <time datetime="2020-02-25T03:20:01.000Z" itemprop="datePublished">February 25, 2020</time>
 	</a>
 
       
     </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <!-- ![head](TLS-学习/head.png) -->
-
-<p>TLS 是用于保障网络请求安全的机制，包括传输报文的加密、报文的完整性以及客户端与服务端的双方认证。MTLS 则指 MUTUAL TLS，即双向认证。使用客户端TLS证书提供额外的保护层，允许以加密方式验证客户端信息。</p>
+        <p><img src="gallery/kubeweekly.jpg" alt></p>
 <a id="more"></a>
 
-<p>一般情况下，客户端只会验证服务端ca来确保 HTTPS/TLS 服务是安全的。即保证数据在传输过程中是加密的完整的。使用MTLS，只有当客户端拥有ca机构颁发的证书，或在客户端ca中提供额外的安全检测，服务器才能接受连接。</p>
-<p>我们先来看下 TLS 的认证过程</p>
-<h2 id="TLS-认证"><a href="#TLS-认证" class="headerlink" title="TLS 认证"></a>TLS 认证</h2><p>TLS 是基于传输层实现的，因此会基于 TCP 三次握手添加特性，再TCP 三次握手建立连接之后，会发生如下图的握手阶段</p>
-<!-- ![handshake](TLS-学习/handshake.png) -->
-<img src="/TLS-学习/handshake.png">
-
+<h2 id="要闻"><a href="#要闻" class="headerlink" title="要闻"></a>要闻</h2><h3 id="ETCD-3-4-4-发布"><a href="#ETCD-3-4-4-发布" class="headerlink" title="ETCD 3.4.4 发布"></a>ETCD 3.4.4 发布</h3><p>这个版本 ETCD 主要修复了一个在碎片整理时崩溃的bug（<a href="https://github.com/etcd-io/etcd/pull/11613）" target="_blank" rel="noopener">https://github.com/etcd-io/etcd/pull/11613）</a></p>
+<p>其他：</p>
 <ul>
-<li>步骤 1. ClientHello – 客户端发送所支持的 SSL/TLS 最高协议版本号和所支持的加密算法集合及压缩方法集合等信息给服务器端。</li>
-<li>步骤 2. ServerHello – 服务器端收到客户端信息后，选定双方都能够支持的 SSL/TLS 协议版本和加密方法及压缩方法，返回给客户端。</li>
-<li>（可选）步骤 3. SendCertificate – 服务器端发送服务端证书给客户端。</li>
-<li>（可选）步骤 4. RequestCertificate – 如果选择双向验证，服务器端向客户端请求客户端证书。</li>
-<li>步骤 5. ServerHelloDone – 服务器端通知客户端初始协商结束。</li>
-<li>（可选）步骤 6. ResponseCertificate – 如果选择双向验证，客户端向服务器端发送客户端证书。</li>
-<li>步骤 7. ClientKeyExchange – 客户端使用服务器端的公钥，对客户端公钥和密钥种子进行加密，再发送给服务器端。</li>
-<li>（可选）步骤 8. CertificateVerify – 如果选择双向验证，客户端用本地私钥生成数字签名，并发送给服务器端，让其通过收到的客户端公钥进行身份验证。</li>
-<li>步骤 9. CreateSecretKey – 通讯双方基于密钥种子等信息生成通讯密钥。</li>
-<li>步骤 10. ChangeCipherSpec – 客户端通知服务器端已将通讯方式切换到加密模式。</li>
-<li>步骤 11. Finished – 客户端做好加密通讯的准备。</li>
-<li>步骤 12. ChangeCipherSpec – 服务器端通知客户端已将通讯方式切换到加密模式。</li>
-<li>步骤 13. Finished – 服务器做好加密通讯的准备。</li>
-<li>步骤 14. Encrypted/DecryptedData – 双方使用客户端密钥，通过对称加密算法对通讯内容进行加密。</li>
-<li>步骤 15. ClosedConnection – 通讯结束后，任何一方发出断开 SSL 连接的消息。</li>
+<li>新增了几个 <code>etcd_debugging_*</code> 的 metrics endpoint</li>
+<li>修复了两个认证方面的bug (<a href="https://github.com/etcd-io/etcd/issues/11414" target="_blank" rel="noopener">issue#11414</a>)</li>
 </ul>
-<p>其中，可选步骤为 MTLS 所需要的步骤。</p>
-<h2 id="MTLS-实验"><a href="#MTLS-实验" class="headerlink" title="MTLS 实验"></a>MTLS 实验</h2><ul>
-<li>客户端 &amp; 服务端 ca证书</li>
-</ul>
-<p>在实验过程中，可以使用 <a href="https://github.com/nicholasjackson/mtls-go-example" target="_blank" rel="noopener">mtls-go-example</a> 工具生成一系列所需要的证书，包括：</p>
+<p>release note(<a href="https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.4.md" target="_blank" rel="noopener">https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.4.md</a>)</p>
+<h3 id="jager-1-17-0-发布"><a href="#jager-1-17-0-发布" class="headerlink" title="jager 1.17.0 发布"></a>jager 1.17.0 发布</h3><p>这个版本，jager 增加了一些支持kafka 的特性：</p>
 <ul>
-<li>根证书 &amp; key</li>
-<li>中间ca（充当 ca）</li>
-<li>应用证书</li>
-<li>客户端证书</li>
+<li>在命令行中，增加 kafka batch 相关配置，包括 <code>suffixBatchSize</code> <code>suffixBatchLinger</code> <code>BatchMaxMessages</code></li>
+<li>为kafka 存储增加了基础认证</li>
 </ul>
-<blockquote>
-<p>关于证书的签发，可以参考文章 <a href="https://xz.aliyun.com/t/2530" target="_blank" rel="noopener">SSL/TLS协议详解(中)——证书颁发机构</a></p>
-</blockquote>
-<p>应用ca 和 客户端ca 都是通过中间链生成，这将允许客户端验证使用中间链的任何服务器。通过使用应用程序证书而不是中间人对客户端证书进行签名，可以将客户端证书锁定到特定应用程序。</p>
-<p>执行 <code>./generate.sh example.com &lt;password&gt;</code></p>
-<p>将会生成</p>
-<ul>
-<li>1_root 根证书</li>
-<li>2_intermediate： 信任中间链</li>
-<li>3_application： 应用/服务相关的 key 和 ca证书</li>
-<li>4_client</li>
+<p>此外也允许在Jaeger Query HTTP API上配置其他标头 <a href="https://github.com/jaegertracing/jaeger/pull/2056" target="_blank" rel="noopener">#2056</a></p>
+<p>release note(<a href="https://github.com/jaegertracing/jaeger/releases/tag/v1.17.0" target="_blank" rel="noopener">https://github.com/jaegertracing/jaeger/releases/tag/v1.17.0</a>)</p>
+<h3 id="istio-1-5-0-架构更改"><a href="#istio-1-5-0-架构更改" class="headerlink" title="istio 1.5.0 架构更改"></a>istio 1.5.0 架构更改</h3><p>在 istio 1.4 及以前版本，其架构中由多个模块组成，包括 polit、galley 等，但是在 1.5.0 版本中，其架构发生重大变化，由多个组件的形式转变为 istiod 和 istio-agent。</p>
+<p>详见<a href="https://mp.weixin.qq.com/s?__biz=MzIwNDIzODExOA==&mid=2650167577&idx=1&sn=3b68bbfbd79249b4f6d20991b3df5d8a&chksm=8ec1c550b9b64c46edf3963c86ec64c2f4ff4f4a9241ca238a4f7eb853f54b160f43c0daade5&mpshare=1&scene=1&srcid=&sharer_sharetime=1582610114789&sharer_shareid=a277d047be431949453a04866e013fd3&key=092f6a25992a6454952f2eb701a5e3f83715cf8e3c26b55d6d6011acea45ab196b9fac310abf17fadadbc71c977368551f31de430eaab2c21f98772a8070049ce1dbb2ff5baf4fa2ed94da3a8f628a5e&ascene=1&uin=NzkzNDU1OTQw&devicetype=Windows+10&version=62080079&lang=zh_CN&exportkey=AWOnEs1ye54bMS6MiMWaENY%3D&pass_ticket=BRx10%2FRKnODsGsOqtkcJm%2FiJQnweePeGYzv2JooVYMAq8pKz9UmzvTw74cXwpgvk" target="_blank" rel="noopener">文章</a></p>
+<h2 id="上游信息"><a href="#上游信息" class="headerlink" title="上游信息"></a>上游信息</h2><ul>
+<li><a href="https://github.com/kubernetes/kubernetes/pull/88292" target="_blank" rel="noopener">#88292</a> kubectl 以前的 <code>--dry-run-server</code>参数被 <code>--dry-run=server|client|none</code>取代</li>
+<li><a href="https://github.com/kubernetes/kubernetes/pull/87975" target="_blank" rel="noopener">#87975</a> kubeadm upgrade node config 从 v1.15 起标记废弃，现在正式移除，请使用 kubeadm upgrade node phase kubelet-config 代替。</li>
 </ul>
-<p>在 istio 中测试：</p>
-<p>#TODO</p>
+<h2 id="文章推荐"><a href="#文章推荐" class="headerlink" title="文章推荐"></a>文章推荐</h2><p>[详细介绍K8s controller 和 informer 机制] <a href="https://engineering.bitnami.com/articles/a-deep-dive-into-kubernetes-controllers.html" target="_blank" rel="noopener">https://engineering.bitnami.com/articles/a-deep-dive-into-kubernetes-controllers.html</a><br>[kata 容器架构] <a href="https://github.com/kata-containers/documentation/blob/master/design/architecture.md" target="_blank" rel="noopener">https://github.com/kata-containers/documentation/blob/master/design/architecture.md</a></p>
 
       
     </div>
     <footer class="entry-meta entry-footer">
       
 	<span class="ico-folder"></span>
-    <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+    <a class="article-category-link" href="/categories/CNCF周报/">CNCF周报</a>
 
       
   <span class="ico-tags"></span>
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网络/">网络</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/KubeWeekly/">KubeWeekly</a></li></ul>
 
       
         <div id="donation_div"></div>
@@ -271,7 +229,7 @@ var a = new Donate({
 	<script src="https://billts.site/js/gitment.js"></script>
 	<script>
 	var gitment = new Gitment({
-		id: 'http://packyzbq.github.io/TLS-学习.html',
+		id: 'http://packyzbq.github.io/CNCF周报-2-25.html',
 		owner: 'packyzbq',
 		repo: 'gitment',
 		oauth: {
@@ -293,19 +251,10 @@ var a = new Donate({
     
 <nav id="article-nav">
   
-    <a href="/docker-相关问题.html" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          docker 运维
-        
-      </div>
-    </a>
   
-  
-    <a href="/istio-服务异常处理.html" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/K8s-controller-infromer.html" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">istio-服务异常处理</div>
+      <div class="article-nav-title">K8s中 controller &amp; infromer机制</div>
     </a>
   
 </nav>
@@ -319,7 +268,7 @@ var a = new Donate({
     <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
     <strong class="toc-title">Contents</strong>
     
-      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TLS-认证"><span class="nav-number">1.</span> <span class="nav-text">TLS 认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MTLS-实验"><span class="nav-number">2.</span> <span class="nav-text">MTLS 实验</span></a></li></ol>
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#要闻"><span class="nav-number">1.</span> <span class="nav-text">要闻</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ETCD-3-4-4-发布"><span class="nav-number">1.1.</span> <span class="nav-text">ETCD 3.4.4 发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jager-1-17-0-发布"><span class="nav-number">1.2.</span> <span class="nav-text">jager 1.17.0 发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-1-5-0-架构更改"><span class="nav-number">1.3.</span> <span class="nav-text">istio 1.5.0 架构更改</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上游信息"><span class="nav-number">2.</span> <span class="nav-text">上游信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文章推荐"><span class="nav-number">3.</span> <span class="nav-text">文章推荐</span></a></li></ol>
     
     </div>
   </aside>
