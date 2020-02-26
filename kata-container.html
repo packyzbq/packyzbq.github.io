@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+
+  <!-- PACE Progress Bar START -->
+  <!-- 
+    <script src="https://raw.githubusercontent.com/HubSpot/pace/v1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://github.com/HubSpot/pace/raw/master/themes/orange/pace-theme-flash.css">
+  
+   -->
+
+  <!-- PACE Progress Bar START -->
+
+  
+  <title>kata container 架构及初探 | packy&#39;s workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="container,kata,K8s">
+  
+  
+  
+    <meta name="baidu-site-verification" content="G7jlTgf5dD">
+  
+  
+  <meta name="description" content="最近有个项目需要考虑安全容器，因此先调研下 kata contaienr，尝尝鲜">
+<meta name="keywords" content="container,kata,K8s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kata container 架构及初探">
+<meta property="og:url" content="http://packyzbq.github.io/kata-container.html">
+<meta property="og:site_name" content="packy&#39;s workspace">
+<meta property="og:description" content="最近有个项目需要考虑安全容器，因此先调研下 kata contaienr，尝尝鲜">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://packyzbq.github.io/gallery/kata_banner.png">
+<meta property="og:updated_time" content="2020-02-26T06:32:31.820Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kata container 架构及初探">
+<meta name="twitter:description" content="最近有个项目需要考虑安全容器，因此先调研下 kata contaienr，尝尝鲜">
+<meta name="twitter:image" content="http://packyzbq.github.io/gallery/kata_banner.png">
+  
+    <link rel="alternate" href="/atom.xml" title="packy&#39;s workspace" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/hiero.css">
+  <link rel="stylesheet" href="/css/glyphs.css">
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/my.css">
+  <!-- Google Adsense -->
+  
+</head>
+</html>
+<script>
+var themeMenus = {};
+
+  themeMenus["/"] = "Home"; 
+
+  themeMenus["/categories/CNCF周报"] = "cncf周报"; 
+
+  themeMenus["/Collections"] = "read later"; 
+
+  themeMenus["/categories/leetcode"] = "leetcode"; 
+
+  themeMenus["/tags"] = "Tags"; 
+
+  themeMenus["/categories"] = "Categories"; 
+
+  themeMenus["/about"] = "About"; 
+
+</script>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  <header id="allheader" class="site-header" role="banner">
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="packy&#39;s workspace" rel="home"> packy&#39;s workspace </a>
+            
+          </h1>
+
+          
+            <div class="site-description">it&#39;s better to burn out than to fade away</div>
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+            <div class="clearfix sf-menu">
+
+              <ul id="main-nav" class="nmenu sf-js-enabled">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/CNCF周报">cncf周报</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/Collections">read later</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories/leetcode">leetcode</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+
+      </div>
+  </div>
+</header>
+
+
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-kata-container" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img fancybox" href="/gallery/kata_banner.png" rel="gallery_ck72xjlxc004850ulrxwhz8vq">
+        <img src="/gallery/kata_banner.png" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      kata container 架构及初探
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	Posted on <a href="/kata-container.html" class="article-date">
+	  <time datetime="2020-02-26T06:20:07.000Z" itemprop="datePublished">February 26, 2020</time>
+	</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近有个项目需要考虑安全容器，因此先调研下 kata contaienr，尝尝鲜</p>
+<a id="more"></a>
+
+<h2 id="Kata-container-简介"><a href="#Kata-container-简介" class="headerlink" title="Kata container 简介"></a>Kata container 简介</h2><p>Kata Container 是两个现有的开源项目合并：Intel Clear Containers和Hyper runV。</p>
+<p>Intel Clear Container项目的目标是通过英特尔®虚拟化技术（VT）解决容器内部的安全问题，并且能够将容器作为轻量级虚拟机（VM）启动，提供了一个可选的运行时间，专注于性能（&lt;100ms启动时间），可与Kubernetes 和Docker 等常用容器环境互操作。英特尔®Clear Container表明，安全性和性能不必是一个折衷，将硬件隔离的安全性与容器的性能可以兼得。</p>
+<p>hyper runV优先于技术无关支持许多不同的CPU架构和管理程序。</p>
+<h3 id="容器安全"><a href="#容器安全" class="headerlink" title="容器安全"></a>容器安全</h3><p>使用Docker轻量级的容器时，最大的问题就是会碰到安全性的问题，其中几个不同的容器可以互相的进行攻击，如果把这个内核给攻掉了，其他所有容器都会崩溃。如果使用KVM等虚拟化技术，会完美解决安全性的问题，但响应的性能会受到一定的影响。</p>
+<p>单单就Docker来说，安全性可以概括为两点：</p>
+<ul>
+<li>不会对主机造成影响</li>
+<li>不会对其他容器造成影响</li>
+</ul>
+<p>所以安全性问题90%以上可以归结为隔离性问题。而Docker的安全问题本质上就是容器技术的安全性问题，这包括共用内核问题以及Namespace还不够完善的限制：</p>
+<ol>
+<li>/proc、/sys等未完全隔离</li>
+<li>Top, free, iostat等命令展示的信息未隔离</li>
+<li>Root用户未隔离</li>
+<li>/dev设备未隔离</li>
+<li>内核模块未隔离</li>
+<li>SELinux、time、syslog等所有现有Namespace之外的信息都未隔离<br>当然，镜像本身不安全也会导致安全性问题。</li>
+</ol>
+<h3 id="kata-隔离技术"><a href="#kata-隔离技术" class="headerlink" title="kata 隔离技术"></a>kata 隔离技术</h3><p>我们都知道 Docker 等一类的容器使用 Cgroup 进行资源限制，使用 linux 的 namespace 机制对容器进行隔离，但在实际运行中，仍是由宿主机向容器直接提供网络、存储、计算等资源，虽然性能损失很小，但存在一定的安全问题。</p>
+<p>Kata Containers是一个开放源代码社区，致力于通过轻量级虚拟机来构建安全的容器运行时，这些虚拟机的感觉和性能类似于容器，但是使用硬件虚拟化技术作为第二防御层，可以提供更强的工作负载隔离。</p>
+<p>kata 底层实现了Intel Clear Containers的最佳部分与Hyper.sh RunV合并，并进行了扩展，以包括对主要架构的支持，包括x86_64之外的AMD64，ARM，IBM p系列和IBM z系列。</p>
+<p>Kata Containers还支持多个虚拟机管理程序，包括QEMU，NEMU和Firecracker，并与其他容器化项目集成。</p>
+<blockquote>
+<p>QEMU 一种虚拟机，与KVM相似，但KVM 是硬件辅助的虚拟化技术，主要负责 比较繁琐的 CPU 和内存虚拟化，而 Qemu 则负责 I/O 虚拟化</p>
+</blockquote>
+<h2 id="架构原理"><a href="#架构原理" class="headerlink" title="架构原理"></a>架构原理</h2><p>kata 实际上是通过创建轻量级虚拟机实现容器之间的资源隔离，再在虚拟机中运行容器运行时，这样就使容器在专用内核中运行，提供网络，I / O和内存的隔离，并可以通过虚拟化VT扩展利用硬件强制隔离。提供安全性的同时，其仍然由很高的性能。</p>
+<p>kata 包含的主要组件有两部分：</p>
+<ul>
+<li>container runtime： 负责为每个 container 或 pod 创建QEMU<em>/KVM虚拟机，支持 <a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">OCI 运行时规范</a>，可以以插件形式嵌入到 Docker 中作为底层的容器运行时；也*</em>支持 K8s 的 CRI 接口**，可以与 CRI-O 和 containerd 集成</li>
+<li>agent ：在宿主机中用于管理容器和在这些容器中运行的进程。</li>
+</ul>
+<h3 id="kata-与-kata-shim"><a href="#kata-与-kata-shim" class="headerlink" title="kata 与 kata-shim"></a>kata 与 kata-shim</h3><p>在 Docker 引擎中，Docker 调用 containerd，containerd 通过 shim 调用 runc创建底层的容器，（之前在 深入理解container 篇中详细描述过此过程），若将kata 集成到 Docker 中时，containerd 则调用 kata 提供的 <code>kata-shim</code> 去创建 kata 容器运行时。</p>
+<img src="/kata-container/docker-kata.png">
+
+<p>值得提的一点是，kata 现在正在努力推行 shimv2 接口，shimv2 主要影响了 K8s 调用 CRI 创建 pod 和容器。</p>
+<img src="/kata-container/shimv2.svg">
+
+<p>借助shimv2，Kubernetes可以使用每个Pod一个shimv2 而不是2N + 1 个shim（每个容器和Pod沙箱本身的容器shim和kata shim）</p>
+<h3 id="agent"><a href="#agent" class="headerlink" title="agent"></a>agent</h3><p>容器进程由 agent 生成，agent 在虚拟机内部作为守护进程运行。</p>
+<p>kata-agent使用 VIRTIO 串行或 VSOCK 接口在宿主机中运行gRPC服务器，QEMU在宿主机中通过暴露 socket 文件向外部提供链接。kata-runtime 使用 gRPC 协议与 agent 进行通信。该协议允许运行时将容器管理命令发送到 agent。该协议还用于在容器和管理引擎（例如Docker Engine）之间传输I/O流（stdout，stderr，stdin）。也就是说在容器中，包括 init 进程在内，所有与容器交互的命令以及 IO 均会通过 VIRTIO 或 VSOCK。</p>
+<h2 id="K8s-集成-kata-container"><a href="#K8s-集成-kata-container" class="headerlink" title="K8s 集成 kata-container"></a>K8s 集成 kata-container</h2><h3 id="准备过程"><a href="#准备过程" class="headerlink" title="准备过程"></a>准备过程</h3><ol>
+<li>硬件支持<br>首先节点需要支持以下四种任意一种cpu虚拟化技术</li>
+</ol>
+<ul>
+<li>Intel VT-x technology</li>
+<li>ARM Hyp mode</li>
+<li>IBM Power Systems</li>
+<li>IBM Z manframes</li>
+</ul>
+<blockquote>
+<p>如果部署在VMware虚拟机中，需要在宿主机开启<strong>嵌套虚拟化</strong>的功能，开启步骤见链接  <a href="https://blog.51cto.com/11434894/2389180?source=dra" target="_blank" rel="noopener">https://blog.51cto.com/11434894/2389180?source=dra</a></p>
+</blockquote>
+<ol start="2">
+<li>软件依赖</li>
+</ol>
+<ul>
+<li>正常运行的 K8s 环境</li>
+<li>containerd</li>
+</ul>
+<h3 id="安装-kata-container"><a href="#安装-kata-container" class="headerlink" title="安装 kata-container"></a>安装 kata-container</h3><p>执行以下脚本安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /etc/os-release</span><br><span class="line">sudo yum -y install yum-utils</span><br><span class="line">ARCH=$(arch)</span><br><span class="line">BRANCH=<span class="string">"<span class="variable">$&#123;BRANCH:-master&#125;</span>"</span></span><br><span class="line">sudo -E yum-config-manager --add-repo <span class="string">"http://download.opensuse.org/repositories/home:/katacontainers:/releases:/<span class="variable">$&#123;ARCH&#125;</span>:/<span class="variable">$&#123;BRANCH&#125;</span>/CentOS_<span class="variable">$&#123;VERSION_ID&#125;</span>/home:katacontainers:releases:<span class="variable">$&#123;ARCH&#125;</span>:<span class="variable">$&#123;BRANCH&#125;</span>.repo"</span></span><br><span class="line">sudo -E yum -y install kata-runtime kata-proxy kata-shim</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：我在安装时，kata 刚刚发布了 1.11 alpha0 版本，此版本中依赖的 qume-vanilla 版本为 <code>4.1.1+git.99c5874a9b</code>，但是 repo 源中只有 <code>4.1.0+git.9e06029aea-6.1.x86_64</code>，因此在执行脚本之前，需要设置 BRANCH 环境变量: <code>export BRANCH=&#39;stable-1.10&#39;</code></p>
+</blockquote>
+<p>安装完成之后，执行命令 <code>kata-runtime kata-check</code> 检查系统是否支持运行 kata runtime</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WARN[0000] modprobe insert module failed: modprobe: FATAL: Module vhost_vsock not found.</span><br><span class="line">  arch=amd64 error="exit status 1" module=vhost_vsock name=kata-runtime pid=21060 source=runtime</span><br><span class="line">ERRO[0000] kernel property not found                     arch=amd64 description="Host Support for Linux VM Sockets" name=vhost_vsock pid=21060 source=runtime type=module</span><br><span class="line">System is capable of running Kata Containers</span><br><span class="line">System can currently create Kata Containers</span><br></pre></td></tr></table></figure>
+
+<p>这里的error 有可能是我使用了VMware 嵌套虚拟化导致的，暂且放置。</p>
+<h3 id="K8s-对接运行时更改为-containerd"><a href="#K8s-对接运行时更改为-containerd" class="headerlink" title="K8s 对接运行时更改为 containerd"></a>K8s 对接运行时更改为 containerd</h3><ol>
+<li><p>首先启用 containerd</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> containerd</span><br></pre></td></tr></table></figure>
+
+<p> 修改 containerd 的配置文件，<code>/etc/containerd/config.toml</code>，官网默认配置见链接：<a href="https://github" target="_blank" rel="noopener">https://github</a>.  com/containerd/cri/blob/master/docs/config.md</p>
+<p> 需要注意的是：</p>
+<ul>
+<li>[plugins.cri] 条目下，可以配置 K8s sandbox 使用的镜像， 默认为<code>k8s.io/pause-amd64:3.2</code></li>
+<li>containerd 1.3.2 版本以前，不支持非安全的 registry，也就是说拉镜像时使用的必须是 https 协议，自   己搭私有仓库的同学，可以升级到 1.3.3，并且增加条目 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[plugins."io.containerd.grpc.v1.cri".registry.mirrors."your registry".tls]</span></span><br><span class="line">    insecure_skip_verify = true</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>修改 kubelet 启动参数</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir -p  /etc/systemd/system/kubelet.service.d/</span><br><span class="line">$ cat &lt;&lt; EOF | sudo tee  /etc/systemd/system/kubelet.service.d/0-containerd.conf</span><br><span class="line">[Service]                                                 </span><br><span class="line">Environment=<span class="string">"KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m    --container-runtime-endpoint=unix:///run/containerd/containerd.sock"</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重启 containerd 和 kubelet</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start containerd</span><br><span class="line">systemctl restart kubelet</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="K8s-配置使用Kata"><a href="#K8s-配置使用Kata" class="headerlink" title="K8s 配置使用Kata"></a>K8s 配置使用Kata</h3><p>K8s 使用 Kata 有两种方式：</p>
+<ul>
+<li>使用 K8s untrusted_workload_runtime</li>
+<li>使用 K8s 的 RuntimeClass，这个在 1.12 版本作为alpha特性使用</li>
+</ul>
+<h4 id="使用-untrusted-workload-runtime"><a href="#使用-untrusted-workload-runtime" class="headerlink" title="使用 untrusted_workload_runtime"></a>使用 untrusted_workload_runtime</h4><p>首先在 containerd 的配置文件中，增加条目</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># "plugins.cri.containerd.untrusted_workload_runtime" is a runtime to run untrusted workloads on it.</span></span><br><span class="line">    <span class="string">[plugins.cri.containerd.untrusted_workload_runtime]</span></span><br><span class="line">      <span class="comment"># runtime_type is the runtime type to use in containerd e.g. io.containerd.runtime.v1.linux</span></span><br><span class="line">      <span class="string">runtime_type</span> <span class="string">=</span> <span class="string">"io.containerd.kata.v2"</span></span><br></pre></td></tr></table></figure>
+
+<p>若使用的 kata 版本较低，不支持 shimV2，则使用条目</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[plugins.cri.containerd.untrusted_workload_runtime]</span></span><br><span class="line">  <span class="comment"># runtime_type is the runtime type to use in containerd e.g. io.containerd.runtime.v1.linux</span></span><br><span class="line">  <span class="string">runtime_type</span> <span class="string">=</span> <span class="string">"io.containerd.runtime.v1.linux"</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># runtime_engine is the name of the runtime engine used by containerd.</span></span><br><span class="line">  <span class="string">runtime_engine</span> <span class="string">=</span> <span class="string">"/usr/bin/kata-runtime"</span></span><br></pre></td></tr></table></figure>
+
+<p>然后重启 containerd <code>systemctl daemon-reload &amp; systemctl restart containerd</code></p>
+<p>K8s 资源需要增加 annotation </p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">annotations:</span></span><br><span class="line">   <span class="string">io.kubernetes.cri.untrusted-workload:</span> <span class="string">"true"</span></span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-untrusted</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">io.kubernetes.cri.untrusted-workload:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  nodeName:</span> <span class="string">k8s3</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">nginx</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="使用-RuntimeClass"><a href="#使用-RuntimeClass" class="headerlink" title="使用 RuntimeClass"></a>使用 RuntimeClass</h4><p>这种模式下，相关软件版本需求如下：</p>
+<ul>
+<li>Kata Container &gt;= 1.5.0</li>
+<li>containerd &gt;= 1.2.0</li>
+<li>K8s &gt;= 1.12.0</li>
+</ul>
+<p>在 Containerd 配置文件中配置相关条目</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[plugins.cri.containerd]</span></span><br><span class="line">      <span class="string">no_pivot</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">    <span class="string">[plugins.cri.containerd.runtimes]</span></span><br><span class="line">      <span class="string">[plugins.cri.containerd.runtimes.runc]</span></span><br><span class="line">         <span class="string">runtime_type</span> <span class="string">=</span> <span class="string">"io.containerd.runc.v1"</span></span><br><span class="line">         <span class="string">[plugins.cri.containerd.runtimes.runc.options]</span></span><br><span class="line">           <span class="string">NoPivotRoot</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">           <span class="string">NoNewKeyring</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">           <span class="string">ShimCgroup</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">IoUid</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line">           <span class="string">IoGid</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line">           <span class="string">BinaryName</span> <span class="string">=</span> <span class="string">"runc"</span></span><br><span class="line">           <span class="string">Root</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">CriuPath</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">SystemdCgroup</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">      <span class="string">[plugins.cri.containerd.runtimes.kata]</span></span><br><span class="line">         <span class="string">runtime_type</span> <span class="string">=</span> <span class="string">"io.containerd.kata.v2"</span></span><br><span class="line">      <span class="string">[plugins.cri.containerd.runtimes.katacli]</span></span><br><span class="line">         <span class="string">runtime_type</span> <span class="string">=</span> <span class="string">"io.containerd.runc.v1"</span></span><br><span class="line">         <span class="string">[plugins.cri.containerd.runtimes.katacli.options]</span></span><br><span class="line">           <span class="string">NoPivotRoot</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">           <span class="string">NoNewKeyring</span> <span class="string">=</span> <span class="literal">false</span></span><br><span class="line">           <span class="string">ShimCgroup</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">IoUid</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line">           <span class="string">IoGid</span> <span class="string">=</span> <span class="number">0</span></span><br><span class="line">           <span class="string">BinaryName</span> <span class="string">=</span> <span class="string">"/usr/bin/kata-runtime"</span></span><br><span class="line">           <span class="string">Root</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">CriuPath</span> <span class="string">=</span> <span class="string">""</span></span><br><span class="line">           <span class="string">SystemdCgroup</span> <span class="string">=</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>在 K8s 中创建 RuntimeClass</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">node.k8s.io/v1beta1</span>  <span class="comment"># RuntimeClass is defined in the node.k8s.io API group</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RuntimeClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kata</span>  </span><br><span class="line"><span class="attr">handler:</span> <span class="string">kata</span>  <span class="comment"># 这里与containerd配置文件中的 [plugins.cri.containerd.runtimes.&#123;handler&#125;] 匹配</span></span><br></pre></td></tr></table></figure>
+
+<p>创建pod</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kata-nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  runtimeClassName:</span> <span class="string">kata</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">      image:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">      ports:</span></span><br><span class="line"><span class="attr">      - containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<p>通过<code>kata-runtime list</code> 可以查看创建出来的 container</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ID                                                                 PID         STATUS      BUNDLE                                                                                                                  CREATED                          OWNER</span><br><span class="line">5a512bfa19cd166c6cc6411dd7e1d20cc41490d0f2df064adab7871c9656a058   -1          running     /run/containerd/io.containerd.runtime.v2.task/k8s.io/5a512bfa19cd166c6cc6411dd7e1d20cc41490d0f2df064adab7871c9656a058   2020-02-26T09:49:43.743162591Z   #0</span><br><span class="line">432628537c5d5606707e225869846542c68cb7406992dcf55a4b48a494f333b8   -1          running     /run/containerd/io.containerd.runtime.v2.task/k8s.io/432628537c5d5606707e225869846542c68cb7406992dcf55a4b48a494f333b8   2020-02-26T09:49:47.928499707Z   #0</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+	<span class="ico-folder"></span>
+    <a class="article-category-link" href="/categories/云原生笔记/">云原生笔记</a>
+
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/container/">container</a></li></ul>
+
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: 'Donate', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: 'http://packyzbq.gitee.io/css/images/wechat.jpg',
+  alipayImage: 'http://packyzbq.gitee.io/css/images/alipay.jpg'
+});
+</script>
+      
+            
+      
+        
+  <!-- Gitment START! Deploy by Z4HD -->
+	<div id="comments"></div>
+	<!-- <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"> -->
+	<!-- <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script> -->
+	<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+	<script src="https://billts.site/js/gitment.js"></script>
+	<script>
+	var gitment = new Gitment({
+		id: 'http://packyzbq.github.io/kata-container.html',
+		owner: 'packyzbq',
+		repo: 'gitment',
+		oauth: {
+			client_id: 'eb603c6f75a64a8e57d3',
+			client_secret: 'fefc8f075a1783749f20d7aa5e3aa3972948c401',
+		},
+	})
+	gitment.render('comments')
+	</script>
+	<!-- Gitment 自定义样式表 -->
+	<link rel="stylesheet" href="/css/comment-gitment.css">
+	<!-- Gitment END! -->
+
+
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/CNCF周报-2-25.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CNCF周报-2-25</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article" style="overflow-y: scroll; max-width: 28%;">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kata-container-简介"><span class="nav-number">1.</span> <span class="nav-text">Kata container 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#容器安全"><span class="nav-number">1.1.</span> <span class="nav-text">容器安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kata-隔离技术"><span class="nav-number">1.2.</span> <span class="nav-text">kata 隔离技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构原理"><span class="nav-number">2.</span> <span class="nav-text">架构原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kata-与-kata-shim"><span class="nav-number">2.1.</span> <span class="nav-text">kata 与 kata-shim</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agent"><span class="nav-number">2.2.</span> <span class="nav-text">agent</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#K8s-集成-kata-container"><span class="nav-number">3.</span> <span class="nav-text">K8s 集成 kata-container</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备过程"><span class="nav-number">3.1.</span> <span class="nav-text">准备过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-kata-container"><span class="nav-number">3.2.</span> <span class="nav-text">安装 kata-container</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#K8s-对接运行时更改为-containerd"><span class="nav-number">3.3.</span> <span class="nav-text">K8s 对接运行时更改为 containerd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#K8s-配置使用Kata"><span class="nav-number">3.4.</span> <span class="nav-text">K8s 配置使用Kata</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-untrusted-workload-runtime"><span class="nav-number">3.4.1.</span> <span class="nav-text">使用 untrusted_workload_runtime</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-RuntimeClass"><span class="nav-number">3.4.2.</span> <span class="nav-text">使用 RuntimeClass</span></a></li></ol></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2020 packy&#39;s workspace All Rights Reserved.
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hiero" target="_blank">hiero</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var contentdiv = document.getElementById("content");
+
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+</script>
+
+<!-- Custome JS -->
+<script src="/js/my.js"></script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories/CNCF周报" class="mobile-nav-link">CNCF周报</a>
+  
+    <a href="/Collections" class="mobile-nav-link">Read Later</a>
+  
+    <a href="/categories/leetcode" class="mobile-nav-link">LeetCode</a>
+  
+    <a href="/tags" class="mobile-nav-link">tags</a>
+  
+    <a href="/categories" class="mobile-nav-link">categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+	<script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?badb8dc7bada1319f19098b58d3a23f7";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>
