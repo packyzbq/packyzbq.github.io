@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Blog重建</title>
+    <url>/2021-07-23-%E9%87%8D%E5%BB%BA/</url>
+    <content><![CDATA[<p>这是Blog重建后的第一篇Post，必须纪念一下啊！</p>
+<p>之前的Blog由于“年久失修”，导致无法访问了，而且是以静态的形式跑在 gitee 上面，目前 gitee 又在整改中不开发 Pages 功能。所以是时候给blog搬个家并重建一次了。当然这次还是用熟悉的 Hexo 来搭建。不过这次重建还是加入了一些自己的想法，想把自己平时的记录体系化，而非以前单一的技术型blog。目前进入了一家国企并想长久的呆下去，心态也就变的佛系很多。没有了加班，生活节奏开始变慢了，也逐渐发现生活上可以记录的多了起来，就像每天回家路上，也会在一个特定的地点停留一下，拍一张特定角度的照片，以此来记录每天的天气、环境变化，也蛮有仪式感的。</p>
+<p>此外我也希望能够在这个blog中记录我的一些想法，并能孵化出一两个像样的项目来。</p>
+<p>最后，放一张每天下班路上的夕阳~<br><img data-src="/../images/scope_pic.jpg"></p>
+]]></content>
+      <categories>
+        <category>Daily</category>
+      </categories>
+      <tags>
+        <tag>日常记录</tag>
+      </tags>
+  </entry>
+</search>
